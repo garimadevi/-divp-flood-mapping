@@ -10,7 +10,7 @@
 | Supervisor | [To verify] |
 | Course | Digital Image and Video Processing (DIVP) mini-project |
 | Date | November 2026 |
-| Status | Draft v0.2 — Day 2 data acquisition complete; results pending |
+| Status | Draft v0.3 — event pivoted to 31 May 2025; data refetched; signal gate passed |
 
 > **Evidence rule:** this document may only state a result that exists in `outputs/` and has a row in `claims_ledger.md`. Anything not yet produced is tagged `[planned]` or `[to verify]`. No invented numbers.
 
@@ -18,7 +18,7 @@
 
 ## Abstract
 
-[planned] Urban flooding in Guwahati is drainage-driven, and single-method SAR flood maps are unreliable in built-up terrain. This project compares multiple classical image-processing methods on the same Sentinel-1 pair and combines their outputs into a per-pixel agreement-based confidence map, then tests whether higher agreement corresponds to higher classification accuracy. Expected contributions are stated as hypotheses, not results.
+[planned] Urban flooding in Guwahati is drainage-driven, and single-method SAR flood maps are unreliable in built-up terrain. This project compares multiple classical image-processing methods on the same Sentinel-1 pair for the 31 May 2025 Guwahati flood, combines their outputs into a per-pixel agreement-based confidence map, and tests whether higher agreement corresponds to higher classification accuracy. Expected contributions are stated as hypotheses, not results.
 
 ---
 
@@ -39,7 +39,7 @@
 **Aim.** [planned]
 
 **Objectives.**
-1. Acquire and preprocess the 8 April and 20 April 2026 Sentinel-1 RTC pair over Guwahati.
+1. Acquire and preprocess the 21 May and 2 June 2025 Sentinel-1 RTC pair over Guwahati.
 2. Implement at least three independent flood-segmentation methods.
 3. Build an agreement-based confidence map (High / Medium / Low / Dry).
 4. Validate per method and per confidence class against optical and manual references.
@@ -53,26 +53,30 @@
 
 ## 4. Study Area and Event
 
-[planned] Guwahati / Kamrup Metropolitan, Bharalu basin. 19–20 April 2026 event. Rainfall and impact facts must be verified and cited before `[locked]`.
+Guwahati / Kamrup Metropolitan, Assam, with a focus on the Bharalu basin and the repeatedly flooded central wards. The selected event is the **31 May 2025** Guwahati flood, reported as record rainfall of about 111 mm in 24 hours, the highest in nearly 70 years `[To verify]`.
+
+**Event selection.** The originally planned 19–20 April 2026 event failed the Day 3 signal gate: the 20 April 17:27 IST Sentinel-1 pass contained no coherent urban flood-like area (0.066 km^2 after cleaning; 0.02% urban dark pixels). Rather than force a weak result, the project pivoted to 31 May 2025, which has a same-orbit RTC pair (21 May and 2 June, descending relative orbit 77) and a usable Sentinel-2 scene on 9 June 2025 (21–31% cloud). The April analysis is retained as a documented negative result.
+
+**Event context.** `[To verify]` Rainfall, affected localities, and impact figures must be cited to ASDMA and press sources before this section is `[locked]`.
 
 ---
 
 ## 5. Data
 
-Verified against the live Planetary Computer STAC API on 2026-11-04. Source of truth: `data/manifest.json`.
+Verified against the live Planetary Computer STAC API on 2026-11-05 (event pivot). Source of truth: `data/manifest.json`.
 
 | Dataset | Collection / item | Date (UTC) | Purpose |
 |---|---|---|---|
-| Sentinel-1 RTC pre | `sentinel-1-rtc` / `S1A_IW_GRDH_1SDV_20260408T115658_20260408T115723_063988_080CD1_rtc` | 2026-04-08 11:57 | Pre-event VV/VH |
-| Sentinel-1 RTC post | `sentinel-1-rtc` / `S1A_IW_GRDH_1SDV_20260420T115658_20260420T115723_064163_08135B_rtc` | 2026-04-20 11:57 | Post-event VV/VH |
-| Sentinel-2 L2A post | `sentinel-2-l2a` / `T46RCQ` + `T46RCP` | 2026-04-20 04:26 | MNDWI reference |
+| Sentinel-1 RTC pre | `sentinel-1-rtc` / `S1A_IW_GRDH_1SDV_20250521T234717_20250521T234742_059299_075C07_rtc` | 2025-05-21 23:47 | Pre-event VV/VH (DESC rel 77) |
+| Sentinel-1 RTC post | `sentinel-1-rtc` / `S1A_IW_GRDH_1SDV_20250602T234717_20250602T234742_059474_rtc` | 2025-06-02 23:47 | Post-event VV/VH (DESC rel 77) |
+| Sentinel-2 L2A post | `sentinel-2-l2a` / `T46RCQ` + `T46RCP` | 2025-06-09 04:27 | MNDWI reference (21–31% cloud) |
 | Copernicus DEM 30 m | `cop-dem-glo-30` / `Copernicus_DSM_COG_10_N26_00_E091_00_DEM` | 2021 | Slope / elevation mask |
 | JRC Global Surface Water | `jrc-gsw` / `90E_30Nv1_3_2020` (`occurrence`) | 2020 | Permanent water mask |
 | ESA WorldCover 10 m | `esa-worldcover` / `ESA_WorldCover_10m_2021_v200_N24E090` | 2021 | Urban / vegetation mask |
 
-**Acquisition status (Day 2).** All layers were read as windowed AOI subsets and reprojected to a common `EPSG:32646` grid at 10 m. The grid is 1713 x 1346 pixels (230.57 km^2) and every layer is 100% valid. SHA256 checksums are recorded in `data/manifest.json`; coverage statistics are in `outputs/tables/day2_coverage.csv`.
+**Acquisition status (Day 3).** All layers were read as windowed AOI subsets and reprojected to a common `EPSG:32646` grid at 10 m. The grid is 1713 x 1346 pixels (230.57 km^2) and every layer is 100% valid. SHA256 checksums are recorded in `data/manifest.json`; coverage statistics are in `outputs/tables/day2_coverage.csv`.
 
-**Data caveats.** The AOI straddles two Sentinel-2 MGRS tiles, so both were mosaicked. The pre-event SAR is 12 days before the event. The post-event pass is at 11:57 UTC (17:27 IST), so some flash water may already have drained; this must be checked at the Day 3 gate before any flood result is reported.
+**Data caveats.** The AOI straddles two Sentinel-2 MGRS tiles, so both were mosaicked. The SAR pair is 21 May (10 days pre-event) and 2 June (2 days post-event), both descending nighttime passes. The Sentinel-2 reference is 9 June (9 days after the event) and 21–31% cloud, so validation must mask clouds and report clear-pixel coverage. Urban SAR remains weak because of double bounce, layover, and shadow; the confidence map will expose this rather than hide it. The originally planned 20 April 2026 event failed the signal gate and is retained as a documented negative result.
 
 ---
 
@@ -96,13 +100,13 @@ Verified against the live Planetary Computer STAC API on 2026-11-04. Source of t
 
 ## 9. Failure Analysis
 
-[planned] Error map and failure taxonomy: urban double bounce, shadow/layover, slope, vegetation, temporal change, date gap.
+[planned] Error map and failure taxonomy: urban double bounce, shadow/layover, slope, vegetation, temporal change, date gap. The 20 April 2026 event is included as a documented failure case: the 17:27 IST pass missed the flash flood, which demonstrates how sensitive SAR event mapping is to acquisition timing.
 
 ---
 
 ## 10. Limitations
 
-[planned] No ground-truth survey; MNDWI is a reference, not truth; 12-day pre-event gap; post-event pass at 17:27 IST may postdate drainage; urban SAR limitations; single event.
+[planned] No ground-truth survey; Sentinel-2 MNDWI is a reference, not truth, and the 9 June scene is 21–31% cloud and 9 days after the event; the SAR pre-event is 10 days before and the post-event 2 days after; both SAR passes are descending nighttime acquisitions; urban SAR is weak because of double bounce, shadow, and layover, so the urban flood extent is likely under-estimated; the 20 April 2026 event failed the signal gate and is retained only as a negative result; single event; no hydrological modelling.
 
 ---
 

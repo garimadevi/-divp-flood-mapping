@@ -85,3 +85,20 @@ Append one entry per working day. Keep each entry short and factual. This is the
 **Next:** Reconfigure the event, refetch the main data tree, update the manifest and report data section, then run the baseline Otsu mask.
 
 ---
+
+## 2026-11-05 — Day 3 (pivot executed)
+
+**Did:** Partner confirmed 31 May 2025. Updated `config.yaml`, archived the April subsets to `data/candidates/april2026/`, refetched the 31 May RTC pair and Sentinel-2 tiles, refetched the static layers, and reran the gate.
+**Why:** The 20 Apr 2026 pass failed the signal gate; the 31 May 2025 event has the strongest honest signal among the checked candidates.
+**Evidence:**
+- `data/manifest.json` (new items + SHA256)
+- `outputs/tables/day2_coverage.csv`
+- `outputs/tables/day3_gate_stats.csv`
+- `outputs/figures/day3_gate_zoom.png`
+- `outputs/tables/negative_april2026_gate.csv`
+- `outputs/figures/negative_april2026_gate.png`
+**Result:** Gate passes. Coherent flood-like area 2.357 km^2 (3.844 km^2 before cleaning); non-permanent SAR-S2 separation 0.753; S2 clear fraction 0.938; urban dark remains low (0.09%).
+**Blockers:** None.
+**Next:** Baseline Otsu mask and first metrics (Day 3 continued).
+
+---

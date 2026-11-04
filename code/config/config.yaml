@@ -19,13 +19,15 @@ paths:
   manifest: "data/manifest.json"
 
 event:
-  name: "Guwahati urban flood, 19-20 April 2026"
-  pre_date: "2026-04-08"
-  post_date: "2026-04-20"
+  # Pivoted on Day 3: the 20 Apr 2026 pass failed the flood-signal gate.
+  name: "Guwahati flood, 31 May 2025"
+  pre_date: "2025-05-21"
+  post_date: "2025-06-02"
   fallback:
-    name: "Guwahati flood, 31 May 2025"
-    pre_date: "2025-05-19"
-    post_date: "2025-05-31"
+    name: "Guwahati flood, 19-20 May 2025"
+    pre_date: "2025-05-07"
+    post_date: "2025-05-19"
+    note: "Official NER-DRR map exists, but S2 on 20 May 2025 is ~100% cloud."
 
 aoi:
   # W, S, E, N in WGS84
@@ -54,16 +56,17 @@ stac:
     worldcover: "map"
 
 items:
-  # Verified against the live STAC API on 2026-11-04 (Day 2 pre-flight).
-  s1_rtc_pre: "S1A_IW_GRDH_1SDV_20260408T115658_20260408T115723_063988_080CD1_rtc"
-  s1_rtc_post: "S1A_IW_GRDH_1SDV_20260420T115658_20260420T115723_064163_08135B_rtc"
-  s1_grd_pre: "S1A_IW_GRDH_1SDV_20260408T115658_20260408T115723_063988_080CD1"
-  s1_grd_post: "S1A_IW_GRDH_1SDV_20260420T115658_20260420T115723_064163_08135B"
+  # Verified against the live STAC API on 2026-11-05 (event pivot).
+  s1_rtc_pre: "S1A_IW_GRDH_1SDV_20250521T234717_20250521T234742_059299_075C07_rtc"
+  s1_rtc_post: "S1A_IW_GRDH_1SDV_20250602T234717_20250602T234742_059474_rtc"
+  # GRD is not used in the 2-week RTC-first build.
+  s1_grd_pre: null
+  s1_grd_post: null
   # The AOI (N 26.22) straddles two MGRS tiles, so both are fetched and mosaicked.
   s2_post_tiles:
-    - "S2B_MSIL2A_20260420T042659_R133_T46RCQ_20260420T062527"
-    - "S2B_MSIL2A_20260420T042659_R133_T46RCP_20260420T062527"
-  s2_post: "S2B_MSIL2A_20260420T042659_R133_T46RCP_20260420T062527"
+    - "S2C_MSIL2A_20250609T042721_R133_T46RCQ_20250609T090214"
+    - "S2C_MSIL2A_20250609T042721_R133_T46RCP_20250609T090214"
+  s2_post: "S2C_MSIL2A_20250609T042721_R133_T46RCP_20250609T090214"
   dem: "Copernicus_DSM_COG_10_N26_00_E091_00_DEM"
   jrc_water: "90E_30Nv1_3_2020"
   worldcover: "ESA_WorldCover_10m_2021_v200_N24E090"

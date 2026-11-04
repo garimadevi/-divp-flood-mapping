@@ -193,9 +193,10 @@ def main() -> int:
     usable = (coherent_area >= 1.0) and (separation >= 0.10)
     print(f"\nNon-permanent SAR-vs-S2 separation: {separation:.4f}")
     print(f"Coherent flood-like area: {coherent_area:.3f} km^2")
+    event_name = cfg["event"]["name"]
     print("\nGate recommendation:",
-          "APRIL EVENT LOOKS USABLE" if usable
-          else "APRIL EVENT WEAK / INCONCLUSIVE — CONSIDER PIVOT TO 31 MAY 2025")
+          f"{event_name}: USABLE" if usable
+          else f"{event_name}: WEAK / INCONCLUSIVE; CONSIDER THE FALLBACK EVENT")
     print("This is a diagnostic recommendation; the final go/no-go is a human decision.")
     return 0
 

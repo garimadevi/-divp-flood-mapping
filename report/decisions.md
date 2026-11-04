@@ -161,7 +161,7 @@ Pixels with k >= 2 are treated as flood-positive for the confidence analysis.
 ---
 
 ## ADR-16 — 20 Apr 2026 fails the signal gate; pivot to 31 May 2025
-**Status:** proposed (pending partner confirmation)
+**Status:** accepted (partner confirmed 2026-11-05)
 **Context:** A post-event pass at 17:27 IST may miss a flash flood that drains earlier. The Day 3 diagnostic tested this explicitly, excluding permanent water and steep slopes.
 **Decision:** Do not use 20 Apr 2026 as the primary event. Pivot to the 31 May 2025 fallback only after the same gate passes on the fallback pair.
 **Rationale:** The 20 Apr pass shows no coherent urban flood-like area (0.066 km^2 after cleaning) and essentially no urban dark pixels (0.02%). A project built on it would be a weak negative result, not a showable flood-confidence study.

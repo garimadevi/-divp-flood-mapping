@@ -10,7 +10,7 @@ Processes a Sentinel-1 RTC pair (8 April 2026 pre-event, 20 April 2026 post-even
 
 ## Status
 
-Day 3 gate failed for 20 Apr 2026. Candidate check recommends the 31 May 2025 event (2.36 km^2 coherent signal, usable S2; 19-20 May has less signal and ~100% cloud). Awaiting confirmation to reconfigure. No flood results yet.
+Event pivoted to 31 May 2025 and refetched. Gate passed: 2.36 km^2 coherent flood-like area, SAR-S2 separation 0.75. The 20 Apr 2026 event is retained as a documented negative result. Baseline masks are next.
 
 ## Layout
 

@@ -2,7 +2,7 @@
 
 **Last updated:** 4 November 2026
 **Working directory:** `D:\DIVP PROJECT`
-**Status:** Execution started 4 Nov 2026 — Day 1 setup complete. 2-week frozen core scope; living draft in `report/`.
+**Status:** Execution started 4 Nov 2026. Event pivoted to 31 May 2025 on 5 Nov 2026 after the 20 Apr 2026 pass failed the flood-signal gate (ADR-16). 2-week frozen core scope; living draft in `report/`.
 
 ---
 
@@ -26,7 +26,7 @@ It contains every decision, verified data point, scope boundary, report outline,
 | Chosen scope | Flood confidence mini-project (pothole/hazard deferred to future work) |
 | Chosen toolchain | Python + ESA SNAP |
 | Study area | Guwahati / Kamrup Metropolitan, Assam; Bharalu basin focus |
-| Study event | 19–20 April 2026 Guwahati urban flood |
+| Study event | 31 May 2025 Guwahati flood (pivoted from 19–20 Apr 2026 after gate failure) |
 | Report format | Markdown first, then PDF via Pandoc + XeLaTeX, also DOCX if needed |
 | Citation style | IEEE |
 | Target length | 20–30 pages |
@@ -117,7 +117,9 @@ Bharalu basin context:
 - A 50 mm/hour downpour can generate about 550,000 m³ of runoff; the existing Bharalu capacity would need over 30 hours to drain it.
 - Guwahati's urban flooding is mainly a drainage failure, not a Brahmaputra overflow.
 
-### 4.2 Event: 19–20 April 2026
+### 4.2 Event: 19–20 April 2026 (superseded)
+
+> **Pivot note (5 Nov 2026):** The 20 Apr 2026 pass failed the flood-signal gate: no coherent urban flood-like area (0.066 km^2 after cleaning; 0.02% urban dark). The active event is now **31 May 2025** (S1 RTC 21 May / 2 June 2025, DESC rel 77; S2 9 June 2025). See ADR-16 and `report/DRAFT_REPORT.md` §4. The April material below is retained as a documented negative result.
 
 Official and reported facts to verify before final submission:
 

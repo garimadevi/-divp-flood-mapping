@@ -19,5 +19,6 @@ Status values: `planned`, `verified`, `rejected`.
 | D-001 | 20 Apr 2026 has no coherent urban flood signal (8.1% change but scattered; 0.066 km^2 cleaned flood-like; 0.02% urban dark) | `outputs/tables/day3_gate_stats.csv`; `outputs/figures/day3_gate_zoom.png` | verified (diagnostic) |
 | D-002 | 31 May 2025 candidate has 2.357 km^2 cleaned flood-like area vs 1.151 km^2 for 19-20 May 2025 | `outputs/tables/candidate_gate.csv`; `outputs/figures/candidate_may19.png`, `candidate_may31.png` | verified (diagnostic) |
 | D-003 | 31 May S2 (9 Jun 2025) has 21-31% cloud; SAR dark16 overlaps S2 water 77.9% vs 1.2% non-water | `outputs/tables/candidate_may31_s2.csv`; `outputs/figures/candidate_may31_s2.png` | verified (diagnostic) |
+| D-004 | 31 May 2025 gate passes: 2.357 km^2 cleaned flood-like area; non-permanent SAR-S2 separation 0.753 | `outputs/tables/day3_gate_stats.csv`; `outputs/figures/day3_gate_zoom.png` | verified (diagnostic) |
 
 **Rule:** if a row cannot be filled with a real path or citation, the claim is removed or tagged `[To verify]`.
