@@ -10,7 +10,7 @@ Processes a Sentinel-1 RTC pair (8 April 2026 pre-event, 20 April 2026 post-even
 
 ## Status
 
-Day 1 — repository and environment setup. No scientific results yet.
+Day 1 complete — repository and environment setup. No scientific results yet.
 
 ## Layout
 
