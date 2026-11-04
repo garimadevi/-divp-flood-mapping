@@ -10,7 +10,7 @@ Processes a Sentinel-1 RTC pair (8 April 2026 pre-event, 20 April 2026 post-even
 
 ## Status
 
-Day 2 complete — AOI subsets fetched and checked. Baseline flood masks and the go/no-go gate are next; no scientific results yet.
+Day 3 gate failed: the 20 Apr 2026 pass shows no coherent urban flood signal. Pivot to the 31 May 2025 fallback pending partner confirmation. No flood results yet.
 
 ## Layout
 

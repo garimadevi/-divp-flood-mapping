@@ -48,3 +48,22 @@ Append one entry per working day. Keep each entry short and factual. This is the
 **Next:** Day 3 — zoomed go/no-go inspection of the Bharalu basin and baseline Otsu; pivot to 31 May 2025 if no usable signal.
 
 ---
+
+## 2026-11-05 — Day 3 (go/no-go gate)
+
+**Did:** Ran the go/no-go diagnostic on the 20 Apr 2026 RTC over the Bharalu / central Guwahati area, excluding JRC permanent water and steep slopes. Did not start the baseline Otsu because the gate failed.
+**Why:** A signal check must happen before committing the report to this event.
+**Evidence:**
+- `outputs/tables/day3_gate_stats.csv`
+- `outputs/figures/day3_gate_zoom.png`
+- `code/preprocessing/day3_gate.py`
+**Result (diagnostic, not a final result):**
+- Post VV < -16 dB: 1.98% of non-permanent pixels vs 1.87% pre-event. Urban non-permanent: 0.02%.
+- Change < -2 dB: 15.5% of non-permanent pixels, but spatially scattered (speckle-like), not coherent.
+- Flood-like mask after cleaning: **0.066 km^2 (6.6 ha)** — no coherent urban inundation.
+- Sentinel-2 non-permanent water is 5.5% of clear non-permanent pixels; the SAR-S2 dark separation (0.36 vs 0.002) is driven by small ponds/permanent water bodies, not an event flood.
+**Conclusion:** The 20 Apr 2026 pass at 17:27 IST does not contain a usable urban flood signal. Building the project on this event would produce a weak, unshowable result. Recommend pivoting to the 31 May 2025 fallback, subject to the same gate.
+**Blockers:** Event choice pending.
+**Next:** Verify fallback data availability and signal, then reconfigure the event if confirmed.
+
+---

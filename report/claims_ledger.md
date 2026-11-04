@@ -16,5 +16,6 @@ Status values: `planned`, `verified`, `rejected`.
 | C-009 | Flood extent with and without permanent-water masking | `outputs/tables/flood_extent.csv` | planned |
 | C-010 | Runtime and peak memory of the pipeline | `outputs/tables/runtime.csv` | planned |
 | C-011 | All input layers share EPSG:32646 at 10 m and are 100% valid | `outputs/tables/day2_coverage.csv` | verified |
+| D-001 | 20 Apr 2026 has no coherent urban flood signal (8.1% change but scattered; 0.066 km^2 cleaned flood-like; 0.02% urban dark) | `outputs/tables/day3_gate_stats.csv`; `outputs/figures/day3_gate_zoom.png` | verified (diagnostic) |
 
 **Rule:** if a row cannot be filled with a real path or citation, the claim is removed or tagged `[To verify]`.
