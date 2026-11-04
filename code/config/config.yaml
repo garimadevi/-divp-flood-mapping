@@ -1,0 +1,131 @@
+# Single source of truth for all pipeline parameters.
+# Do not hard-code AOI, dates, item IDs, thresholds or paths elsewhere.
+
+project:
+  title: "Multi-Method Urban Flood Segmentation and Agreement-Based Confidence Estimation Using Sentinel-1 SAR Imagery"
+  authors:
+    - name: "Garima Devi"
+      roll: "240101007"
+    - name: "Pritom Sarma"
+      roll: "240101013"
+  department: "Electronics and Communication Engineering, GUIST"
+  institution: "Gauhati University"
+  seed: 42
+
+paths:
+  data_raw: "data/raw"
+  data_processed: "data/processed"
+  outputs: "outputs"
+  manifest: "data/manifest.json"
+
+event:
+  name: "Guwahati urban flood, 19-20 April 2026"
+  pre_date: "2026-04-08"
+  post_date: "2026-04-20"
+  fallback:
+    name: "Guwahati flood, 31 May 2025"
+    pre_date: "2025-05-19"
+    post_date: "2025-05-31"
+
+aoi:
+  # W, S, E, N in WGS84
+  bbox: [91.68, 26.10, 91.85, 26.22]
+  name: "Guwahati / Bharalu basin"
+
+grid:
+  crs: "EPSG:32646"
+  resolution_m: 10
+
+stac:
+  api: "https://planetarycomputer.microsoft.com/api/stac/v1"
+  collections:
+    s1_rtc: "sentinel-1-rtc"
+    s1_grd: "sentinel-1-grd"
+    s2_l2a: "sentinel-2-l2a"
+    dem: "cop-dem-glo-30"
+    jrc_water: "jrc-global-surface-water"
+    worldcover: "esa-worldcover"
+
+items:
+  # Verified in HANDOFF.md section 4.3 / 18.2. Confirm against STAC on Day 2.
+  s1_rtc_pre: "S1A_IW_GRDH_1SDV_20260408T115658_20260408T115723_063988_080CD1_rtc"
+  s1_rtc_post: "S1A_IW_GRDH_1SDV_20260420T115658_20260420T115723_064163_08135B_rtc"
+  s1_grd_pre: "S1A_IW_GRDH_1SDV_20260408T115658_20260408T115723_063988_080CD1"
+  s1_grd_post: "S1A_IW_GRDH_1SDV_20260420T115658_20260420T115723_064163_08135B"
+  s2_post: "S2B_MSIL2A_20260420T042659_R133_T46RCP_20260420T062527"
+  dem: "Copernicus_DSM_COG_10_N26_00_E091_00_DEM"
+  jrc_water: "90E_30Nv1_3_2020"
+  worldcover: "ESA_WorldCover_10m_2021_v200_N24E090"
+
+sentinel1:
+  primary_product: "rtc"
+  polarizations: ["vv", "vh"]
+  convert_to_db: true
+  # Filter in LINEAR power, then convert to dB (ADR-02).
+  speckle:
+    enabled: true
+    method: "lee"
+    window: 7
+    apply_on_linear_power: true
+
+flood_masks:
+  methods:
+    - id: "otsu_vv"
+      type: "global_otsu"
+      input: "post_vv_db"
+    - id: "otsu_vh"
+      type: "global_otsu"
+      input: "post_vh_db"
+    - id: "change_vv"
+      type: "change_detection"
+      input: ["pre_vv_db", "post_vv_db"]
+      mode: "difference_db"
+      threshold_db: -3.0
+    - id: "adaptive_vv"
+      type: "adaptive_threshold"
+      input: "post_vv_db"
+      window: 51
+      offset: 0.0
+      enabled: true
+  morphology:
+    opening: true
+    closing: true
+    kernel: 3
+    min_component_px: 100
+
+confidence:
+  # k = number of methods classifying a pixel as flooded; N = enabled methods.
+  high_min_k_ratio: 1.0
+  medium_min_k_ratio: 0.75
+  low_min_k: 2
+  classes: ["dry", "low", "medium", "high"]
+  binary_flood_min_k: 2
+
+masks:
+  permanent_water:
+    enabled: true
+    occurrence_threshold: 50
+  slope_deg_max: 10.0
+  urban_vegetation:
+    enabled: true
+
+validation:
+  reference: "s2_mndwi_plus_manual_sample"
+  mndwi:
+    green: "B03"
+    swir1: "B11"
+    threshold: 0.0
+  cloud_mask: "SCL"
+  manual_sample:
+    n_points: 300
+    strata: ["confidence_class", "terrain"]
+  metrics: ["precision", "recall", "f1", "iou", "overall_accuracy", "cohen_kappa"]
+  bootstrap:
+    enabled: true
+    n: 1000
+    block_m: 500
+
+runtime:
+  single_process: true
+  windowed_reads: true
+  max_memory_gb: 14

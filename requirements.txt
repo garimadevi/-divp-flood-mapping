@@ -1,0 +1,16 @@
+numpy
+scipy
+scikit-image
+opencv-python
+xarray
+matplotlib
+pandas
+streamlit
+pyyaml
+rasterio
+rioxarray
+pystac-client
+planetary-computer
+geopandas
+shapely
+pyproj

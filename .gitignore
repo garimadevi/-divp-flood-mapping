@@ -1,0 +1,25 @@
+# Environment and caches (must stay on D:)
+.venv/
+.cache/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Large data (manifest is committed)
+data/raw/
+data/processed/
+data/labels/
+
+# Generated heavy outputs (tables/figures can be regenerated)
+outputs/maps/
+outputs/figures/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Report build artefacts
+report/*.pdf
+report/*.docx
