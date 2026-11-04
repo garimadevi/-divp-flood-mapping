@@ -43,15 +43,26 @@ stac:
     s1_grd: "sentinel-1-grd"
     s2_l2a: "sentinel-2-l2a"
     dem: "cop-dem-glo-30"
-    jrc_water: "jrc-global-surface-water"
+    # Corrected on Day 2: the Planetary Computer collection id is jrc-gsw.
+    jrc_water: "jrc-gsw"
     worldcover: "esa-worldcover"
+  assets:
+    s1_rtc: ["vv", "vh"]
+    s2_l2a: ["B03", "B11", "SCL"]
+    dem: "data"
+    jrc_water: "occurrence"
+    worldcover: "map"
 
 items:
-  # Verified in HANDOFF.md section 4.3 / 18.2. Confirm against STAC on Day 2.
+  # Verified against the live STAC API on 2026-11-04 (Day 2 pre-flight).
   s1_rtc_pre: "S1A_IW_GRDH_1SDV_20260408T115658_20260408T115723_063988_080CD1_rtc"
   s1_rtc_post: "S1A_IW_GRDH_1SDV_20260420T115658_20260420T115723_064163_08135B_rtc"
   s1_grd_pre: "S1A_IW_GRDH_1SDV_20260408T115658_20260408T115723_063988_080CD1"
   s1_grd_post: "S1A_IW_GRDH_1SDV_20260420T115658_20260420T115723_064163_08135B"
+  # The AOI (N 26.22) straddles two MGRS tiles, so both are fetched and mosaicked.
+  s2_post_tiles:
+    - "S2B_MSIL2A_20260420T042659_R133_T46RCQ_20260420T062527"
+    - "S2B_MSIL2A_20260420T042659_R133_T46RCP_20260420T062527"
   s2_post: "S2B_MSIL2A_20260420T042659_R133_T46RCP_20260420T062527"
   dem: "Copernicus_DSM_COG_10_N26_00_E091_00_DEM"
   jrc_water: "90E_30Nv1_3_2020"

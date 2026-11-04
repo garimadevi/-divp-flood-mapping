@@ -127,3 +127,33 @@ Pixels with k >= 2 are treated as flood-positive for the confidence analysis.
 **Rationale:** Credibility and academic integrity.
 **Evidence:** `report/claims_ledger.md`.
 **Consequence:** Final report is assembled from the draft, not retyped from memory.
+
+---
+
+## ADR-13 — JRC collection id and asset
+**Status:** accepted (Day 2)
+**Context:** The handoff named `jrc-global-surface-water`, but the live Planetary Computer catalog has no such collection.
+**Decision:** Use collection `jrc-gsw`, item `90E_30Nv1_3_2020`, asset `occurrence`.
+**Rationale:** Verified against the STAC API on Day 2; `occurrence` gives the 0-100% water-occurrence layer needed for the permanent-water mask.
+**Evidence:** STAC query; `data/manifest.json` dataset `jrc_water`.
+**Consequence:** Config corrected; the 50% occurrence threshold in ADR-06 applies to this asset.
+
+---
+
+## ADR-14 — Mosaic both Sentinel-2 tiles
+**Status:** accepted (Day 2)
+**Context:** The AOI north edge (26.22 N) lies above the `T46RCP` north edge (26.217 N); `T46RCQ` starts at 26.117 N, so the AOI straddles both tiles.
+**Decision:** Fetch both `T46RCQ` and `T46RCP`, reproject each to the common grid, and mosaic valid pixels.
+**Rationale:** A single tile would leave a thin northern strip uncovered. Mosaicking both keeps the AOI complete.
+**Evidence:** Tile bboxes from the STAC API; `data/manifest.json` datasets `s2_post_tile_1/2`.
+**Consequence:** `s2_post_*` layers are mosaics; report this in the data section.
+
+---
+
+## ADR-15 — Windowed COG reads on a common UTM grid
+**Status:** accepted (Day 2)
+**Context:** Full RTC scenes are large; the AOI is only ~230 km^2.
+**Decision:** Read only the AOI window from each remote Cloud-Optimized GeoTIFF, reproject to `EPSG:32646` at 10 m, and store local subsets.
+**Rationale:** Avoids full-scene downloads and keeps processing within the 16 GB laptop.
+**Evidence:** `outputs/tables/day2_coverage.csv` (all layers 1713 x 1346, 10 m, 100% valid).
+**Consequence:** All later modules consume the local subsets, not the remote scenes.

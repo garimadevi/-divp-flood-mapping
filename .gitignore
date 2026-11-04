@@ -12,7 +12,8 @@ data/labels/
 
 # Generated heavy outputs (tables/figures can be regenerated)
 outputs/maps/
-outputs/figures/
+outputs/figures/*
+!outputs/figures/*.png
 
 # OS / editor
 .DS_Store

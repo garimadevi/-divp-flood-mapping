@@ -32,3 +32,19 @@ Append one entry per working day. Keep each entry short and factual. This is the
 **Next:** Write and run the STAC manifest script; fetch windowed RTC/S2/DEM/JRC/WorldCover subsets (Day 2).
 
 ---
+
+## 2026-11-05 — Day 2
+
+**Did:** Resolved all seven STAC items and fetched windowed AOI subsets (no full scenes). Built the common `EPSG:32646` 10 m grid, mosaicked both Sentinel-2 tiles, and recorded SHA256 checksums in `data/manifest.json`.
+**Why:** Create one reproducible analysis grid and a provenance record before any segmentation.
+**Evidence:**
+- `data/manifest.json` (7 datasets + SHA256 of 10 local subsets)
+- `outputs/tables/day2_coverage.csv`
+- `outputs/figures/day2_quicklook.png`
+- Grid: 1713 x 1346 px at 10 m = 230.57 km^2; all layers 100% valid; CRS/resolution checks passed.
+- AOI subset sizes: S1 ~8.2 MB/band; S2 ~3.2 MB/band; DEM 6.9 MB; JRC 0.05 MB; WorldCover 0.19 MB.
+**Observations:** Permanent Brahmaputra water is clearly dark in both VV scenes. At AOI scale, the post-pre difference does **not** show an obvious widespread urban flood signal. This is not yet a conclusion: Day 3 must zoom into the Bharalu basin and run the formal go/no-go before any flood result is reported.
+**Blockers:** None for acquisition.
+**Next:** Day 3 — zoomed go/no-go inspection of the Bharalu basin and baseline Otsu; pivot to 31 May 2025 if no usable signal.
+
+---

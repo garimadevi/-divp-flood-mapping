@@ -10,7 +10,7 @@
 | Supervisor | [To verify] |
 | Course | Digital Image and Video Processing (DIVP) mini-project |
 | Date | November 2026 |
-| Status | Draft v0.1 — scope frozen, implementation starting |
+| Status | Draft v0.2 — Day 2 data acquisition complete; results pending |
 
 > **Evidence rule:** this document may only state a result that exists in `outputs/` and has a row in `claims_ledger.md`. Anything not yet produced is tagged `[planned]` or `[to verify]`. No invented numbers.
 
@@ -59,16 +59,20 @@
 
 ## 5. Data
 
-[planned] Data manifest with exact STAC IDs, acquisition times, resolution, purpose, licence. Source of truth: `data/manifest.json`.
+Verified against the live Planetary Computer STAC API on 2026-11-04. Source of truth: `data/manifest.json`.
 
-| Dataset | Item / ID | Date | Purpose |
+| Dataset | Collection / item | Date (UTC) | Purpose |
 |---|---|---|---|
-| Sentinel-1 RTC | [To verify from manifest] | 2026-04-08 | Pre-event |
-| Sentinel-1 RTC | [To verify from manifest] | 2026-04-20 | Post-event |
-| Sentinel-2 L2A | [To verify from manifest] | 2026-04-20 | Optical reference (MNDWI) |
-| Copernicus DEM 30 m | [To verify from manifest] | — | Slope / elevation mask |
-| JRC Global Surface Water | [To verify from manifest] | — | Permanent water mask |
-| ESA WorldCover 10 m | [To verify from manifest] | — | Urban / vegetation mask |
+| Sentinel-1 RTC pre | `sentinel-1-rtc` / `S1A_IW_GRDH_1SDV_20260408T115658_20260408T115723_063988_080CD1_rtc` | 2026-04-08 11:57 | Pre-event VV/VH |
+| Sentinel-1 RTC post | `sentinel-1-rtc` / `S1A_IW_GRDH_1SDV_20260420T115658_20260420T115723_064163_08135B_rtc` | 2026-04-20 11:57 | Post-event VV/VH |
+| Sentinel-2 L2A post | `sentinel-2-l2a` / `T46RCQ` + `T46RCP` | 2026-04-20 04:26 | MNDWI reference |
+| Copernicus DEM 30 m | `cop-dem-glo-30` / `Copernicus_DSM_COG_10_N26_00_E091_00_DEM` | 2021 | Slope / elevation mask |
+| JRC Global Surface Water | `jrc-gsw` / `90E_30Nv1_3_2020` (`occurrence`) | 2020 | Permanent water mask |
+| ESA WorldCover 10 m | `esa-worldcover` / `ESA_WorldCover_10m_2021_v200_N24E090` | 2021 | Urban / vegetation mask |
+
+**Acquisition status (Day 2).** All layers were read as windowed AOI subsets and reprojected to a common `EPSG:32646` grid at 10 m. The grid is 1713 x 1346 pixels (230.57 km^2) and every layer is 100% valid. SHA256 checksums are recorded in `data/manifest.json`; coverage statistics are in `outputs/tables/day2_coverage.csv`.
+
+**Data caveats.** The AOI straddles two Sentinel-2 MGRS tiles, so both were mosaicked. The pre-event SAR is 12 days before the event. The post-event pass is at 11:57 UTC (17:27 IST), so some flash water may already have drained; this must be checked at the Day 3 gate before any flood result is reported.
 
 ---
 
