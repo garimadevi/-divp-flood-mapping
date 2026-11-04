@@ -932,3 +932,49 @@ Start with:
 3. Run the 20 Apr water-signal go/no-go check.
 4. In parallel, open Report_v1.md and draft front matter, abstract, introduction.
 ```
+
+---
+
+## 19. Session log — 5 November 2026 (supersedes §18.10)
+
+### 19.1 What changed today
+
+- **Day 1:** repo skeleton, `D:` venv, pinned environment, governance files (`DRAFT_REPORT.md`, `WORKLOG.md`, `decisions.md`, `claims_ledger.md`, `references.bib`), `config.yaml`.
+- **Day 2:** STAC manifest + windowed AOI subsets (RTC/S2/DEM/JRC/WorldCover); common `EPSG:32646` 10 m grid (1713 x 1346 px = 230.57 km^2, 100% valid); SHA256 manifest.
+- **Day 3:** the 20 Apr 2026 event **failed** the flood-signal gate: cleaned flood-like area 0.066 km^2; urban dark 0.02%. Pivoted to the fallback.
+- **Fallback check:** 19–20 May 2025 had 1.151 km^2 and S2 on 20 May is ~100% cloud; 31 May 2025 had 2.357 km^2 and S2 on 9 Jun is 21–31% cloud. **31 May 2025 selected.**
+- **Pivot executed:** main data refetched for 31 May 2025:
+  - S1 RTC pre: 21 May 2025 23:47 UTC, DESC rel orbit 77.
+  - S1 RTC post: 2 June 2025 23:47 UTC, DESC rel orbit 77.
+  - S2 reference: 9 June 2025, T46RCQ + T46RCP.
+  - Gate passes: 2.357 km^2 cleaned flood-like; non-permanent SAR–S2 separation 0.753.
+- **Analysis-ready stack built:** Lee 7×7 on linear power (4 looks) → dB; slope; permanent-water, urban, vegetation masks.
+- **Four flood masks built:** Otsu VV, Otsu VH, change VV, adaptive VV (local mean − 1.5σ, 51 px).
+- **Provisional mask results:**
+  - Otsu VV: 9.492 km^2, threshold −10.65 dB.
+  - Otsu VH: 9.348 km^2, threshold −17.98 dB.
+  - Change VV: 4.141 km^2, threshold −3.0 dB.
+  - Adaptive VV: 0.424 km^2, median local threshold −8.85 dB.
+  - Kappa: Otsu VV–VH 0.946 (redundant); change vs Otsu 0.54–0.56; adaptive vs others 0.04–0.07.
+
+### 19.2 Current state
+
+- **Code:** `code/preprocessing/` (manifest, fetch, build stack, gate, candidate checks); `code/flood_masks/run_masks.py`.
+- **Outputs:** `outputs/maps/masks/*.tif`, `outputs/tables/mask_stats.csv`, `mask_kappa.csv`, `outputs/figures/masks_overview.png`, `day3_gate_zoom.png`, `negative_april2026_gate.*`.
+- **Report:** `report/DRAFT_REPORT.md` now describes the 31 May event, implemented methodology, and provisional mask diagnostics. `WORKLOG.md`, `decisions.md` (ADR-16/17/18), `claims_ledger.md` updated.
+- **Git:** commits up to `e86bd23`; the Day 3 stack/masks/docs update is the next commit.
+
+### 19.3 Tomorrow's first actions
+
+1. Build the agreement confidence map (`code/confidence/agreement.py`): k/N classes (High 4/4, Medium 3/4, Low 2/4, Dry 0–1/4), save GeoTIFF + class stats + figure.
+2. Decide whether to keep both Otsu variants or replace Otsu VH with VH change detection, given kappa 0.946. Record the decision in `decisions.md`.
+3. Start validation: Sentinel-2 MNDWI (9 Jun) on clear pixels + a stratified manual sample; compute precision/recall/F1/IoU/overall accuracy/kappa per method and per confidence class; reliability curve.
+4. Update the draft report's Results with confidence/validation numbers, each with a claims-ledger row.
+5. Commit and push the Day 3 work; keep the April gate as a documented negative result.
+
+### 19.4 Open issues
+
+- Urban SAR signal is weak (0.09% urban dark on 31 May); report as a finding, not a bug.
+- Adaptive mask is conservative (0.424 km^2); consider k=1.2 or another local method if it is too sparse.
+- Sentinel-2 is 9 days after the event; the manual sample is the primary event-water reference.
+- Supervisor name and report template are still `[To verify]`.

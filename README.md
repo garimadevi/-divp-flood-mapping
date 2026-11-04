@@ -10,7 +10,7 @@ Processes a Sentinel-1 RTC pair (8 April 2026 pre-event, 20 April 2026 post-even
 
 ## Status
 
-Event pivoted to 31 May 2025 and refetched. Gate passed: 2.36 km^2 coherent flood-like area, SAR-S2 separation 0.75. The 20 Apr 2026 event is retained as a documented negative result. Baseline masks are next.
+Day 3 complete: 31 May 2025 event, analysis-ready stack built, four flood masks + kappa diagnostics done. The 20 Apr 2026 event is retained as a documented negative result. Agreement confidence and validation are next.
 
 ## Layout
 

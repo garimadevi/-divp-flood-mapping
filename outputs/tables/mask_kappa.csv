@@ -1,0 +1,7 @@
+a,b,kappa
+otsu_vv,otsu_vh,0.9458
+otsu_vv,change_vv,0.5607
+otsu_vv,adaptive_vv,0.0674
+otsu_vh,change_vv,0.5397
+otsu_vh,adaptive_vv,0.0621
+change_vv,adaptive_vv,0.0386

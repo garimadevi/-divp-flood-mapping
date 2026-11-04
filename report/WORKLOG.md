@@ -102,3 +102,24 @@ Append one entry per working day. Keep each entry short and factual. This is the
 **Next:** Baseline Otsu mask and first metrics (Day 3 continued).
 
 ---
+
+## 2026-11-05 — Day 3 (analysis-ready stack + first masks)
+
+**Did:** Built the analysis-ready stack (Lee filter on linear power -> dB), slope, and static masks; built four flood masks; computed per-mask area and pairwise Cohen's kappa.
+**Why:** First implementation milestone after the event pivot: produce the ensemble inputs and check method independence.
+**Evidence:**
+- `data/processed/stack_meta.json`, `data/processed/s1_*_db.tif`, `slope_deg.tif`, `data/processed/masks/`
+- `outputs/maps/masks/{otsu_vv,otsu_vh,change_vv,adaptive_vv}.tif`
+- `outputs/tables/mask_stats.csv`, `outputs/tables/mask_kappa.csv`
+- `outputs/figures/masks_overview.png`
+**Results (provisional):**
+- Otsu VV: 9.492 km^2, threshold -10.65 dB.
+- Otsu VH: 9.348 km^2, threshold -17.98 dB.
+- Change VV: 4.141 km^2, threshold -3.0 dB.
+- Adaptive VV: 0.424 km^2, local mean minus 1.5 sigma, 51 px window.
+- Kappa: Otsu VV vs VH 0.946 (near-duplicate); Otsu VV vs change 0.561; Otsu VH vs change 0.540; adaptive vs others 0.04–0.07 (independent but conservative).
+**Interpretation:** The Otsu pair is redundant; the adaptive mask is independent but conservative. This is exactly the redundancy the confidence design must expose. The permanent-water mask works: 79.6% of JRC permanent pixels are dark in post VV, and only 3.5% of non-permanent pixels are dark.
+**Blockers:** None.
+**Next:** Build the agreement confidence map; then decide whether to keep both Otsu variants or replace Otsu VH with a VH change method.
+
+---

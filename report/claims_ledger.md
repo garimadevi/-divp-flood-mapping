@@ -7,8 +7,8 @@ Status values: `planned`, `verified`, `rejected`.
 |---|---|---|---|
 | C-001 | Sentinel-1 RTC pre/post pair acquired for the AOI | `data/manifest.json` (items + SHA256) | verified |
 | C-002 | Study AOI is 1713 x 1346 px at 10 m = 230.57 km^2 | `outputs/tables/day2_coverage.csv`; `code/preprocessing/check_coverage.py` | verified |
-| C-003 | Number of flood masks built and their parameters | `outputs/tables/method_parameters.csv` | planned |
-| C-004 | Pairwise Cohen's kappa between masks | `outputs/tables/kappa_matrix.csv` | planned |
+| C-003 | Four flood masks built; areas 9.492 / 9.348 / 4.141 / 0.424 km^2; thresholds -10.65 / -17.98 / -3.0 / -8.85 dB | `outputs/tables/mask_stats.csv`; `outputs/maps/masks/` | verified (provisional) |
+| C-004 | Pairwise Cohen's kappa: Otsu VV-VH 0.946; change vs Otsu 0.54-0.56; adaptive vs others 0.04-0.07 | `outputs/tables/mask_kappa.csv` | verified (provisional) |
 | C-005 | High-class precision exceeds Low-class precision (H1) | `outputs/tables/calibration.csv` + CI table | planned |
 | C-006 | Per-method precision/recall/F1/IoU/OA | `outputs/tables/metrics_by_method.csv` | planned |
 | C-007 | Per-confidence-class precision | `outputs/tables/metrics_by_class.csv` | planned |
@@ -16,6 +16,7 @@ Status values: `planned`, `verified`, `rejected`.
 | C-009 | Flood extent with and without permanent-water masking | `outputs/tables/flood_extent.csv` | planned |
 | C-010 | Runtime and peak memory of the pipeline | `outputs/tables/runtime.csv` | planned |
 | C-011 | All input layers share EPSG:32646 at 10 m and are 100% valid | `outputs/tables/day2_coverage.csv` | verified |
+| C-012 | Analysis-ready stack: Lee 7x7 on linear power with 4 looks, then dB; slope and static masks on the same grid | `data/processed/stack_meta.json`; `outputs/figures/masks_overview.png` | verified |
 | D-001 | 20 Apr 2026 has no coherent urban flood signal (8.1% change but scattered; 0.066 km^2 cleaned flood-like; 0.02% urban dark) | `outputs/tables/day3_gate_stats.csv`; `outputs/figures/day3_gate_zoom.png` | verified (diagnostic) |
 | D-002 | 31 May 2025 candidate has 2.357 km^2 cleaned flood-like area vs 1.151 km^2 for 19-20 May 2025 | `outputs/tables/candidate_gate.csv`; `outputs/figures/candidate_may19.png`, `candidate_may31.png` | verified (diagnostic) |
 | D-003 | 31 May S2 (9 Jun 2025) has 21-31% cloud; SAR dark16 overlaps S2 water 77.9% vs 1.2% non-water | `outputs/tables/candidate_may31_s2.csv`; `outputs/figures/candidate_may31_s2.png` | verified (diagnostic) |

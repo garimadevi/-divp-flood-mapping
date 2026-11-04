@@ -80,6 +80,7 @@ sentinel1:
     enabled: true
     method: "lee"
     window: 7
+    looks: 4
     apply_on_linear_power: true
 
 flood_masks:
@@ -99,7 +100,7 @@ flood_masks:
       type: "adaptive_threshold"
       input: "post_vv_db"
       window: 51
-      offset: 0.0
+      k_std: 1.5
       enabled: true
   morphology:
     opening: true

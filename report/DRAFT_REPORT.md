@@ -80,9 +80,21 @@ Verified against the live Planetary Computer STAC API on 2026-11-05 (event pivot
 
 ---
 
-## 6. Methodology
+## 6. Methodology (partial — implemented parts)
 
-[planned] M1 preprocessing, M2 flood-mask ensemble, M3 agreement confidence and masks, M4 validation. Equations and parameter choices must be written as implemented.
+**M1 preprocessing (implemented).** The RTC pair is read on the common 10 m grid. A 7x7 Lee filter is applied to linear power with 4 looks, then converted to dB (`10*log10`). Slope is derived from the Copernicus DEM. Permanent water is JRC occurrence >= 50%; urban is ESA WorldCover class 50; vegetation is classes 10–40. All products share the `EPSG:32646` grid.
+
+**M2 flood-mask ensemble (implemented).** Four methods are applied:
+1. Global Otsu on post-event VV (threshold -10.65 dB).
+2. Global Otsu on post-event VH (threshold -17.98 dB).
+3. VV change detection: post - pre < -3.0 dB.
+4. Local adaptive threshold: post VV < local mean - 1.5 × local std (51 px window), median threshold -8.85 dB.
+
+Each mask is cleaned with a 3×3 opening/closing, small components (<100 px) are removed, and permanent water and slopes >10° are masked.
+
+**M3 agreement confidence (planned).** Count k of N methods calling a pixel flooded: k=N High, k=N-1 Medium, 2<=k<=N-2 Low, k<=1 Dry.
+
+**M4 validation (planned).** Sentinel-2 MNDWI on clear pixels plus a stratified manual sample; precision, recall, F1, IoU, overall accuracy, kappa, and a reliability curve by confidence class.
 
 ---
 
@@ -92,9 +104,18 @@ Verified against the live Planetary Computer STAC API on 2026-11-05 (event pivot
 
 ---
 
-## 8. Results
+## 8. Results (provisional)
 
-[planned] Only script-generated results. Tables and figures must reference the producing script and a `claims_ledger.md` row.
+**Mask diagnostics — 31 May 2025.** These are provisional diagnostics, not validated accuracy results. Evidence: `outputs/tables/mask_stats.csv`, `outputs/tables/mask_kappa.csv`.
+
+| Method | Threshold | Flood area (km^2) |
+|---|---|---|
+| Otsu VV | -10.65 dB | 9.492 |
+| Otsu VH | -17.98 dB | 9.348 |
+| Change VV | -3.0 dB | 4.141 |
+| Adaptive VV | -8.85 dB (median local) | 0.424 |
+
+Pairwise Cohen's kappa: Otsu VV vs VH 0.946 (near-duplicate); Otsu VV vs change 0.561; Otsu VH vs change 0.540; adaptive vs the others 0.04–0.07 (independent but conservative). The Otsu pair is redundant; this must be addressed in the confidence design and reported honestly. No validation against reference data has been run yet, so no accuracy claim is made.
 
 ---
 

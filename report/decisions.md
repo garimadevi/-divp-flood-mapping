@@ -169,3 +169,23 @@ Pixels with k >= 2 are treated as flood-positive for the confidence analysis.
 **Consequence:** If confirmed, update the event dates, Sentinel-1 pair, Sentinel-2 date, reference map, report data section, and manifest. Keep the April analysis as a documented negative/limitation result.
 
 **Candidate check (Day 3):** 19-20 May 2025 uses RTC 7 May / 19 May and has 1.151 km^2 cleaned flood-like area, but its S2 on 20 May is ~100% cloud. 31 May 2025 uses RTC 21 May / 2 June (DESC rel 77), has 2.357 km^2 cleaned flood-like area, and its S2 on 9 June is 21-31% cloud. The 31 May event is therefore the recommended fallback; the urban signal is weak in both and will be a reported limitation.
+
+---
+
+## ADR-17 — Analysis-ready SAR stack
+**Status:** accepted (Day 3)
+**Context:** RTC is calibrated and terrain-corrected, but the Planetary Computer RTC still shows speckle; filtering dB values is mathematically invalid (ADR-02).
+**Decision:** Apply a 7x7 Lee filter on linear power with 4 looks, then convert to dB (`10*log10`). Use -9999 dB as nodata.
+**Rationale:** Reduces speckle before thresholding while keeping the processing order correct.
+**Evidence:** `code/preprocessing/build_stack.py`; `data/processed/stack_meta.json`; `outputs/figures/masks_overview.png`.
+**Consequence:** Report the filter parameters. Verify the RTC provider metadata before claiming the input was unfiltered.
+
+---
+
+## ADR-18 — Adaptive threshold implementation and Otsu redundancy
+**Status:** accepted (Day 3)
+**Context:** `skimage.filters.threshold_local` on dB SAR over-detected (66.9 km^2). A local mean minus k*sigma threshold is more controlled.
+**Decision:** Use `local_mean - 1.5*local_std` over a 51 px window. k=2.0 was too sparse after cleaning.
+**Rationale:** Produces an independent but conservative mask (0.424 km^2); kappa vs the other masks is 0.04-0.07.
+**Evidence:** `outputs/tables/mask_stats.csv`; `outputs/tables/mask_kappa.csv`.
+**Consequence:** Keep the method as an independent ensemble member and report its conservatism. Otsu VV vs VH kappa is 0.946, so that pair is redundant; decide whether to keep both or replace Otsu VH with VH change detection.

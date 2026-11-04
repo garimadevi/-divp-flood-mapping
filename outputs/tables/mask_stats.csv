@@ -1,0 +1,5 @@
+method,threshold,flood_px,flood_km2,fraction_nonpermanent
+otsu_vv,-10.6481,94921,9.492,0.04534
+otsu_vh,-17.9798,93480,9.348,0.04465
+change_vv,-3.0000,41408,4.141,0.01979
+adaptive_vv,-8.8497,4238,0.424,0.00203
