@@ -67,3 +67,21 @@ Append one entry per working day. Keep each entry short and factual. This is the
 **Next:** Verify fallback data availability and signal, then reconfigure the event if confirmed.
 
 ---
+
+## 2026-11-05 — Day 3 (fallback candidate check)
+
+**Did:** Fetched and gated both fallback candidates with Sentinel-1 RTC; fetched Sentinel-2 for the stronger candidate.
+**Why:** Choose the event with the best honest signal before rebuilding the pipeline.
+**Evidence:**
+- `data/candidates/may19/` and `data/candidates/may31/`
+- `outputs/tables/candidate_gate.csv`
+- `outputs/tables/candidate_may31_s2.csv`
+- `outputs/figures/candidate_may19.png`, `candidate_may31.png`, `candidate_may31_s2.png`
+**Results (diagnostic):**
+- 19-20 May 2025 (RTC 7 May / 19 May): cleaned flood-like 1.151 km^2; urban 0.000 km^2; S2 20 May is ~100% cloud.
+- 31 May 2025 (RTC 21 May / 2 June): cleaned flood-like 2.357 km^2; urban 0.011 km^2; S2 9 June is 21-31% cloud; SAR dark16 where S2 water 77.9% vs 1.2% where non-water.
+**Conclusion:** Recommend the **31 May 2025** event. It has the strongest coherent signal and the only usable optical reference. Urban SAR remains weak, which will be reported as a finding, not hidden.
+**Blockers:** Partner confirmation of the pivot.
+**Next:** Reconfigure the event, refetch the main data tree, update the manifest and report data section, then run the baseline Otsu mask.
+
+---

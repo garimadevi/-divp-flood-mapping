@@ -9,6 +9,7 @@ __pycache__/
 data/raw/
 data/processed/
 data/labels/
+data/candidates/
 
 # Generated heavy outputs (tables/figures can be regenerated)
 outputs/maps/

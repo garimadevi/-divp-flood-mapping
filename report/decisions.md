@@ -167,3 +167,5 @@ Pixels with k >= 2 are treated as flood-positive for the confidence analysis.
 **Rationale:** The 20 Apr pass shows no coherent urban flood-like area (0.066 km^2 after cleaning) and essentially no urban dark pixels (0.02%). A project built on it would be a weak negative result, not a showable flood-confidence study.
 **Evidence:** `outputs/tables/day3_gate_stats.csv`; `outputs/figures/day3_gate_zoom.png`; `code/preprocessing/day3_gate.py`.
 **Consequence:** If confirmed, update the event dates, Sentinel-1 pair, Sentinel-2 date, reference map, report data section, and manifest. Keep the April analysis as a documented negative/limitation result.
+
+**Candidate check (Day 3):** 19-20 May 2025 uses RTC 7 May / 19 May and has 1.151 km^2 cleaned flood-like area, but its S2 on 20 May is ~100% cloud. 31 May 2025 uses RTC 21 May / 2 June (DESC rel 77), has 2.357 km^2 cleaned flood-like area, and its S2 on 9 June is 21-31% cloud. The 31 May event is therefore the recommended fallback; the urban signal is weak in both and will be a reported limitation.

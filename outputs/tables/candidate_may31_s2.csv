@@ -1,0 +1,8 @@
+metric,value
+s2_clear_fraction,0.9376
+s2_water_fraction_clear,0.1247
+s2_water_fraction_clear_nonpermanent,0.0378
+sar_dark16_where_s2_water,0.7793
+sar_dark16_where_s2_nonwater,0.0121
+sar_floodlike_where_s2_water,0.0845
+sar_floodlike_where_s2_nonwater,0.0088
