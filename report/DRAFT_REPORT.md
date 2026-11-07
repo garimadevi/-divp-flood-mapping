@@ -10,7 +10,7 @@
 | Supervisor | [To verify] |
 | Course | Digital Image and Video Processing (DIVP) mini-project |
 | Date | November 2026 |
-| Status | Draft v0.4 — pivoted to the Brahmaputra riverine flood (23 June 2023); ensemble + confidence + validation complete |
+| Status | Draft v0.5 — riverine flood (23 June 2023); ensemble + confidence + validation + ensemble-design analysis (Kittler/GMM) complete |
 
 > **Evidence rule:** this document may only state a result that exists in `outputs/` and has a row in `claims_ledger.md`. Anything not yet produced is tagged `[planned]` or `[to verify]`. No invented numbers.
 
@@ -18,29 +18,43 @@
 
 ## Abstract
 
-Urban flash flooding in Guwahati proved undetectable in C-band Sentinel-1 SAR (small, transient, and not dark enough in built-up terrain; the operational Copernicus GFM product excludes urban areas). The project therefore targets the **Brahmaputra riverine flood of late June 2023** over a widened Guwahati floodplain AOI. Four classical image-processing methods (Otsu VV, Otsu VH, VV change detection, local adaptive VV) are combined into a per-pixel agreement-based confidence map and validated against Sentinel-2 MNDWI. The binary flood map (agreement ≥ 2/4) reaches precision 86.6%, recall 76.1%, F1 0.81, IoU 0.68. The central hypothesis — that higher inter-method agreement implies higher accuracy — is **rejected**: the reliability curve is non-monotonic (Medium 88.6% > Low 82.9% > High 77.1%), because the adaptive member degrades the High class. The urban events (20 Apr 2026, 31 May 2025, 18 May 2023) are retained as documented negative results.
+Urban flash flooding in Guwahati proved undetectable in C-band Sentinel-1 SAR (small, transient, and not dark enough in built-up terrain; the operational Copernicus GFM product excludes urban areas). The project therefore targets the **Brahmaputra riverine flood of late June 2023** over a widened Guwahati floodplain AOI. Multiple classical image-processing methods (Otsu VV, Otsu VH, VV change detection, local adaptive, plus two alternatives — Kittler–Illingworth and a Gaussian-mixture threshold) are combined into a per-pixel agreement-based confidence map and validated against Sentinel-2 MNDWI. The binary flood map (agreement ≥ 2) reaches precision 86.6%, recall 76.1%, F1 0.81, IoU 0.68. The hypothesis that higher inter-method agreement implies higher accuracy is **rejected for the original ensemble** — the reliability curve is non-monotonic (Medium 88.6% > High 77.1%) because the adaptive member is uncorrelated and low-recall — but **replacing adaptive with the GMM member restores monotonicity** (High 88.4% > Medium 83.7% > Low 45.6%). The conclusion: agreement predicts reliability only when ensemble members genuinely measure the same signal. The urban events (20 Apr 2026, 31 May 2025, 18 May 2023) are retained as documented negative results.
 
 ---
 
 ## 1. Introduction
 
-[planned] Guwahati and the Brahmaputra floodplain; why binary flood maps fail in cities but work on open water; role and limits of Sentinel-1 SAR; why agreement-based confidence is worth testing, and why it fails when an ensemble member is a poor detector.
+Flooding is among the most frequent and damaging natural hazards in the Brahmaputra valley, and Kamrup district — which contains Guwahati, Assam's largest city — experiences near-annual inundation when the Brahmaputra and its tributaries exceed their banks during the South Asian monsoon. Rapid, wall-to-wall knowledge of where water stands is essential for response and damage assessment. Synthetic aperture radar (SAR) is the natural sensor for this task: it images through cloud and at night, which is precisely when monsoon floods occur and optical sensors are unavailable.
+
+SAR flood mapping is conventionally framed as binary segmentation — a single algorithm produces a water/land map with no indication of how trustworthy each pixel is. This project asks a different question: when several independent image-processing methods are run on the same scene, does the degree to which they agree indicate how accurate the resulting map is? If so, a per-pixel agreement count can serve as a confidence layer, distinguishing pixels that are almost certainly water from those that are uncertain — information that matters for decisions made from the map.
+
+The study area also motivated the work negatively: Guwahati's flash floods (short-lived waterlogging after intense rainfall) proved too small, transient, and shallow to appear as dark targets in C-band SAR, a limitation independently confirmed by the operational Copernicus Global Flood Monitoring product, which excludes built-up areas from flood delineation. The project therefore targets a large, persistent riverine flood, where the SAR signal is unambiguous, to test the confidence methodology under favourable conditions and to establish the conditions under which agreement-based confidence is trustworthy.
 
 ---
 
 ## 2. Problem Statement
 
-[planned] P1–P5.
+The work decomposes into five sub-problems.
+
+**P1 — Data.** Acquire a co-registered Sentinel-1 SAR pre/post pair and an independent Sentinel-2 scene for a real flood event, reprojected to a common grid, with permanent water and steep slopes masked.
+
+**P2 — Segmentation.** Implement multiple classical flood-segmentation methods that make genuinely different assumptions about the data (global histogram thresholding, dual-polarisation thresholding, change detection, local adaptive thresholding, and minimum-error/Gaussian-mixture thresholding).
+
+**P3 — Confidence.** Combine the methods into a per-pixel agreement count k of N and define a confidence map (High / Medium / Low / Dry) plus a binary flood map.
+
+**P4 — Validation.** Validate the flood map and each confidence class against an independent Sentinel-2 MNDWI water reference, computing precision, recall, F1, IoU, and overall accuracy, and a reliability curve by class.
+
+**P5 — Inference.** Determine whether agreement predicts accuracy (H1), and characterise what properties an ensemble member must have for the confidence map to be trustworthy.
 
 ---
 
 ## 3. Aim, Objectives, Research Question, Hypothesis
 
-**Aim.** [planned]
+**Aim.** To determine whether per-pixel inter-method agreement in a multi-method Sentinel-1 flood segmentation provides a reliable measure of map confidence, and to characterise the conditions — in particular the quality and independence of the ensemble members — under which such an agreement-based confidence map is trustworthy, validated against Sentinel-2.
 
 **Objectives.**
 1. Acquire and preprocess a same-orbit Sentinel-1 RTC pair (11 June and 23 June 2023, ascending rel 41) over the Guwahati Brahmaputra floodplain.
-2. Implement four independent flood-segmentation methods.
+2. Implement an ensemble of independent flood-segmentation methods (four core methods plus two alternative thresholding methods).
 3. Build an agreement-based confidence map (High / Medium / Low / Dry).
 4. Validate per method and per confidence class against Sentinel-2 MNDWI.
 5. Test whether High-confidence pixels have higher precision than Low-confidence pixels.
@@ -84,13 +98,15 @@ Verified against the live Planetary Computer STAC API on 2026-11-07 (riverine pi
 
 **M1 preprocessing.** The RTC pair is read on the common 10 m grid. A 7x7 Lee filter is applied to linear power with 4 looks, then converted to dB (`10*log10`). Slope is derived from the Copernicus DEM. Permanent water is JRC occurrence ≥ 50%; urban is ESA WorldCover class 50; vegetation is classes 10–40. All products share the `EPSG:32646` grid.
 
-**M2 flood-mask ensemble.** Four methods are applied:
+**M2 flood-mask ensemble.** Four core methods are applied, plus two alternative thresholding methods evaluated for the ensemble:
 1. Global Otsu on post-event VV (threshold −12.55 dB).
 2. Global Otsu on post-event VH (threshold −17.31 dB).
 3. VV change detection: post − pre < −3.0 dB.
 4. Local adaptive threshold: post VV < local mean − 1.5 × local std (51 px window).
+5. Kittler–Illingworth minimum-error threshold (post VV, −14.02 dB).
+6. Two-component Gaussian-mixture threshold (post VV, −10.27 dB).
 
-Each mask is cleaned with a 3×3 opening/closing, small components (<100 px) are removed, and permanent water and slopes >10° are masked. Pairwise Cohen's kappa: Otsu VV–VH 0.849; Otsu vs change 0.76–0.79; adaptive vs the others 0.06–0.08.
+Each mask is cleaned with a 3×3 opening/closing, small components (<100 px) are removed, and permanent water and slopes >10° are masked. Pairwise Cohen's kappa: Otsu VV–VH 0.849; Otsu vs change 0.76–0.79; Kittler/GMM vs the three core methods 0.80–0.83; adaptive vs the others only 0.06–0.08.
 
 **M3 agreement confidence.** k of N=4 methods call a pixel flooded: k=4 High, k=3 Medium, k=2 Low, k≤1 Dry; flood-positive is k ≥ 2.
 
@@ -126,7 +142,9 @@ Reference hierarchy: Sentinel-2 MNDWI on clear pixels (primary), NRSC/ISRO offic
 | Medium | 3 | 84.77 | 88.6% |
 | High | 4 | 3.91 | 77.1% |
 
-**Binary flood map (k ≥ 2, 122.59 km²).** Evidence: `outputs/tables/metrics_flood_binary.csv`. Precision 86.6%, recall 76.1%, F1 0.810, IoU 0.680, overall accuracy 93.8%.
+> The table above is the *original* 4-method ensemble (with adaptive) and is the diagnostic that motivated the revision. The **adopted final** confidence rule uses GMM in place of adaptive (ADR-23); its reliability is monotonic (see "Key finding" below).
+
+**Binary flood map (k ≥ 2, 122.59 km²).** Evidence: `outputs/tables/metrics_flood_binary.csv`. Precision 86.6%, recall 76.1%, F1 0.810, IoU 0.680, overall accuracy 93.8%. The adopted GMM-based ensemble yields a marginally better F1 of 0.8138 (recall 80.2%; see "Refined conclusion" below).
 
 **Key finding (H1 rejected, then refined).** The 4-method reliability curve is non-monotonic: Medium (3/4) precision 88.6% > Low 82.9% > High 77.1%. H1 ("High-class precision exceeds Low-class precision") is **rejected** for the 4-method ensemble. The adaptive method (κ ≈ 0.06–0.08 vs the others) is a poor ensemble member: it is extremely conservative (5.63 km², 2.7% recall) and its false positives concentrate in the darkest pixels that the other methods also flag, so requiring all four to agree removes true water without removing false positives. Dropping the adaptive member restores monotonicity: the 3-method ensemble gives **high 88.4% > medium 82.6% > low 43.2%** — High (3/3) is now the most precise class — while the binary flood map is unchanged (F1 0.8094 vs 0.8097). Evidence: `outputs/tables/metrics_by_class.csv`, `outputs/tables/sensitivity_drop_adaptive.csv`, `outputs/figures/reliability_curve.png`; ADR-21, ADR-22.
 
@@ -136,19 +154,39 @@ Reference hierarchy: Sentinel-2 MNDWI on clear pixels (primary), NRSC/ISRO offic
 
 ## 9. Failure Analysis
 
-[planned] Error map and failure taxonomy. The urban events are documented failure cases: 20 Apr 2026 (pass at 17:27 IST missed the flash flood), 31 May 2025 (no urban flood water), 18 May 2023 (too small/transient; two orbits disagreed; optical water decreased). These show how sensitive C-band flood mapping is to event type, size, and acquisition timing.
+The project's most informative results are its failures, recorded here rather than hidden.
+
+**1. Urban flash floods (20 Apr 2026, 31 May 2025, 18 May 2023).** All three failed the pre-registered gate: the flood signal in built-up terrain is too small, transient, and shallow to appear as a coherent dark/change target in C-band SAR. The 18 May 2023 case is the cleanest diagnostic — two same-orbit SAR pairs disagreed on the changed pixels (urban-change Jaccard 0.06), and optical water *decreased* between 16 and 21 May. The operational Copernicus GFM product independently confirms this: its flood layers are all-nodata over urban Guwahati because its exclusion mask covers built-up areas.
+
+**2. The adaptive ensemble member.** Its pairwise kappa against the other methods is ≈ 0.06 (effectively random agreement) and its recall is 2.7%. It contributed a vote uncorrelated with the true water signal, which is why requiring all four methods to agree produced a High-confidence class that was *less* precise than Medium.
+
+**3. Leave-one-out sensitivity.** Dropping any one of the three "good" methods (Otsu VV, Otsu VH, change) breaks monotonicity *and* lowers F1 (to 0.69 / 0.68 / 0.80), whereas dropping only adaptive is benign. This confirms the ensemble's accuracy rests on the three correlated methods, and that a single weak member is the source of the failure.
+
+These cases demonstrate the central sensitivity of C-band flood mapping to event type, size, acquisition timing, and ensemble composition.
 
 ---
 
 ## 10. Limitations
 
-[planned] No ground-truth survey; Sentinel-2 MNDWI is a reference, not truth, and the 25 June scene is 33%/52% cloud (clear fraction 0.771) and 2 days after the S1 post; the SAR pair is 12 days apart; adaptive method is too conservative; single event; no hydrological modelling; urban-flood capability is a documented negative result.
+1. **Reference, not truth.** Sentinel-2 MNDWI is a proxy; turbid water, wet soil, and cloud shadow can be misclassified. No field survey was conducted.
+2. **Temporal offset.** The Sentinel-2 reference (25 June) is 2 days after the Sentinel-1 post (23 June); the flood is dynamic, so some pixels changed between acquisitions.
+3. **Cloud cover.** The Sentinel-2 scene is 33%/52% cloud per tile (clear fraction 0.771 over the domain), so validation covers only clear pixels.
+4. **Single event and AOI.** All results come from one riverine event in one location; generalisation to other floods and seasons is untested.
+5. **Pre/post spacing.** The SAR pair is 12 days apart (11 and 23 June); the change-detection method therefore reflects net change over a long window, not the event alone.
+6. **Classical methods only.** No deep-learning or polarimetric methods were used; the adaptive method's weakness is a documented limitation of simple local statistics in heterogeneous terrain.
+7. **No depth or hydrology.** The maps are extents, not depths, and no hydraulic model was applied.
 
 ---
 
 ## 11. Future Work
 
-[planned] 3-method agreement re-design (drop adaptive), per-member re-weighting, stratified manual sample, multi-pass persistence, FwDET depth, extension to other Assam flood events.
+1. **Bootstrap confidence intervals** on all metrics (the pipeline config already specifies block bootstrap, n = 1000).
+2. **Stratified manual sample** (~300 points across confidence classes and terrain) as a second, independent reference alongside MNDWI.
+3. **Generalise the ensemble-design principle** — formalise "member quality" (kappa against the others, recall) and select or re-weight members accordingly.
+4. **Multi-pass persistence** — require water to persist across consecutive acquisitions to reduce speckle false positives.
+5. **Depth estimation** (e.g., FwDET) from the flood extent and DEM.
+6. **Extend to other Assam flood events and seasons** to test whether the monotonic reliability result generalises.
+7. **Revisit urban flood** with higher-resolution or polarimetric SAR, now that the C-band limitation is characterised.
 
 ---
 

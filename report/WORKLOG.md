@@ -232,3 +232,14 @@ Append one entry per working day. Keep each entry short and factual. This is the
 **Next:** Commit.
 
 ---
+
+## 2026-11-07 — Day 5 (draft report sections)
+
+**Did:** Drafted the six remaining `[planned]` sections of `report/DRAFT_REPORT.md` (Introduction, Problem Statement, Aim, Failure Analysis, Limitations, Future Work) and fixed the stale spots left by ADR-23: updated the status to v0.5, rewrote the Abstract to include the GMM resolution, added Kittler/GMM to Methodology M2, corrected Objective #2, and annotated the Results tables as diagnostic vs final.
+**Why:** Bring the report in line with the completed ensemble-design analysis so no `[planned]` sections remain.
+**Evidence:** `report/DRAFT_REPORT.md` (v0.5).
+**Result:** No `[planned]` tags remain. Two `[To verify]` placeholders remain for facts only the authors can supply: supervisor name (title page) and event-context citations (rainfall/localities/impact from ASDMA/NRSC/press).
+**Blockers:** Supervisor name and event-context figures are pending from the authors.
+**Next:** Fill the two `[To verify]` items; then finalise References (`references.bib`) and lock the report.
+
+---
