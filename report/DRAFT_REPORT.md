@@ -7,7 +7,7 @@
 | Authors | Garima Devi (Roll No. 240101007), Pritom Sarma (Roll No. 240101013) |
 | Department | Electronics and Communication Engineering, GUIST |
 | Institution | Gauhati University |
-| Supervisor | [To verify] |
+| Supervisor | Jyoti Prakash Medhi |
 | Course | Digital Image and Video Processing (DIVP) mini-project |
 | Date | November 2026 |
 | Status | Draft v0.5 — riverine flood (23 June 2023); ensemble + confidence + validation + ensemble-design analysis (Kittler/GMM) complete |
@@ -152,6 +152,8 @@ Reference hierarchy: Sentinel-2 MNDWI on clear pixels (primary), NRSC/ISRO offic
 
 **Cross-terrain generalization.** Global thresholds are strongly terrain-specific. The Otsu threshold fitted on farmland is −12.54 dB, but on urban Guwahati it is −2.91 dB — a ~10 dB gap; Kittler's urban threshold is even degenerate (+2.6 dB), because built-up terrain has no dark water mode to split. Transferring the urban threshold to farmland drops F1 from 0.73 to 0.43 (Otsu; similar for Kittler and GMM, gap ≈ 0.28–0.30), and urban terrain contains essentially no detectable water regardless of threshold (in-place urban F1 ≈ 0.003). This quantifies the earlier observation that global Otsu is invalid in urban terrain: **a threshold tuned on one terrain does not transfer to another.** Evidence: `outputs/tables/cross_terrain.csv`, `outputs/figures/cross_terrain.png`; `code/confidence/cross_terrain.py`.
 
+**Bootstrap confidence intervals.** A spatial block bootstrap (500 m blocks, 1,000 replicates) over the evaluated pixels gives 95% CIs that account for spatial autocorrelation. Binary flood map (GMM ensemble): F1 0.8139 [0.8012, 0.8260], precision 0.8266 [0.8110, 0.8411], recall 0.8021 [0.7854, 0.8162]. Reliability curve (median precision [95% CI]): Dry 4.1% [3.8, 4.5], Low 45.5% [43.0, 48.2], Medium 83.7% [81.6, 85.7], High 88.4% [86.9, 89.7]. The High and Medium CIs do not overlap, so the High-confidence class is **significantly** more precise than Medium — confirming the refined H1. Evidence: `outputs/tables/bootstrap_ci.csv`, `outputs/figures/reliability_ci.png`; `code/confidence/bootstrap_ci.py`.
+
 ---
 
 ## 9. Failure Analysis
@@ -182,7 +184,7 @@ These cases demonstrate the central sensitivity of C-band flood mapping to event
 
 ## 11. Future Work
 
-1. **Bootstrap confidence intervals** on all metrics (the pipeline config already specifies block bootstrap, n = 1000).
+1. **Bootstrap confidence intervals** on all metrics — ✅ done (§8, `outputs/tables/bootstrap_ci.csv`).
 2. **Stratified manual sample** (~300 points across confidence classes and terrain) as a second, independent reference alongside MNDWI.
 3. **Generalise the ensemble-design principle** — formalise "member quality" (kappa against the others, recall) and select or re-weight members accordingly.
 4. **Multi-pass persistence** — require water to persist across consecutive acquisitions to reduce speckle false positives.

@@ -277,3 +277,21 @@ Append one entry per working day. Keep each entry short and factual. This is the
 **Next:** Supervisor name; bootstrap CI (still pending).
 
 ---
+
+## 2026-11-07 — Day 5 (bootstrap CI + supervisor name)
+
+**Did:** Set the supervisor name (Jyoti Prakash Medhi) in the report title page. Added `code/confidence/bootstrap_ci.py` + `notebooks/09_bootstrap_ci.ipynb`: a spatial block bootstrap (500 m blocks, 1000 reps, seed 42) over evaluated pixels, computing 95% CIs for the binary flood map and the per-class reliability curve.
+**Why:** Give the metrics error bars that account for spatial autocorrelation, and remove the last report placeholder.
+**Evidence:**
+- `outputs/tables/bootstrap_ci.csv`, `outputs/figures/reliability_ci.png`
+- `code/confidence/bootstrap_ci.py`, `notebooks/09_bootstrap_ci.ipynb`
+- `report/claims_ledger.md` C-022; `report/DRAFT_REPORT.md` §8 + Future Work
+**Result (verified):**
+- Binary flood (GMM): F1 0.8139 [0.801, 0.826]; precision 0.8266 [0.811, 0.841]; recall 0.8021 [0.785, 0.816].
+- Reliability (median [95% CI]): dry 4.1%, low 45.5%, medium 83.7% [81.6, 85.7], high 88.4% [86.9, 89.7].
+- High and Medium CIs do not overlap → High is significantly more precise (refined H1 confirmed).
+**Conclusion:** All metrics now carry uncertainty; the report has no `[To verify]` placeholders left.
+**Blockers:** None.
+**Next:** Final review; optionally the stratified manual sample and cross-scene generalization remain as Future Work.
+
+---

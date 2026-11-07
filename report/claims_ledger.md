@@ -36,5 +36,6 @@ Status values: `planned`, `verified`, `rejected`.
 | C-019 | Leave-one-out ablation: dropping any of the 3 good methods breaks monotonicity and lowers F1 (Otsu VV→0.693, Otsu VH→0.675, change→0.797); only dropping adaptive is monotonic (F1 0.8094) | `outputs/tables/leave_one_out.csv` | verified |
 | C-020 | Cross-terrain generalization: Otsu threshold farm −12.54 dB vs urban −2.91 dB (~10 dB gap); transferring the urban threshold to farmland drops F1 0.73→0.43 (gap ≈ 0.29, all methods); urban has ~no water regardless (in-place F1 ≈ 0.003) | `outputs/tables/cross_terrain.csv`; `outputs/figures/cross_terrain.png` | verified |
 | C-021 | GMM-ensemble validation vs S2 (confusion counts): TP 769,405 / FP 161,621 / FN 190,390 / TN 4,428,616; precision 82.6%, recall 80.2%, F1 0.8138 | `outputs/figures/validation_agreement.png`; `code/confidence/validation_viz.py` | verified |
+| C-022 | Bootstrap 95% CI (500 m blocks, 1000 reps): binary F1 0.8139 [0.801, 0.826]; reliability High 88.4% [86.9, 89.7] vs Medium 83.7% [81.6, 85.7] — non-overlapping, so High is significantly more precise | `outputs/tables/bootstrap_ci.csv`; `outputs/figures/reliability_ci.png` | verified |
 
 **Rule:** if a row cannot be filled with a real path or citation, the claim is removed or tagged `[To verify]`.

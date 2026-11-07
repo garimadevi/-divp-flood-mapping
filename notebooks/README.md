@@ -20,6 +20,7 @@ work is visible and runnable step by step.
 | `06_alternative_members.ipynb` | `code/confidence/alternative_members.py` | Kittler & GMM as 4th member + leave-one-out ablation (ADR-23) |
 | `07_validation_visualization.ipynb` | `code/confidence/validation_viz.py` | Cloud removal, MNDWI reference, and the SAR-vs-S2 TP/FP/FN agreement map |
 | `08_cross_terrain.ipynb` | `code/confidence/cross_terrain.py` | Cross-terrain threshold generalization (farm vs urban) |
+| `09_bootstrap_ci.ipynb` | `code/confidence/bootstrap_ci.py` | Block-bootstrap 95% CIs for metrics + reliability curve |
 
 ## Conventions
 
