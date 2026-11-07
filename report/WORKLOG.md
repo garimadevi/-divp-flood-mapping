@@ -243,3 +243,18 @@ Append one entry per working day. Keep each entry short and factual. This is the
 **Next:** Fill the two `[To verify]` items; then finalise References (`references.bib`) and lock the report.
 
 ---
+
+## 2026-11-07 — Day 5 (event context + references)
+
+**Did:** Researched and wrote the Section 4 "Event context" paragraph with citations, and extended `report/references/references.bib` with the missing sources (Kittler–Illingworth 1986, EM/GMM 1977, Copernicus GFM, Planetary Computer, Sentinel-1/2 missions, FloodList/CWC/ASDMA-NRSC June 2023 flood reports).
+**Why:** The event-context facts (rainfall, river levels, affected people, official inundation) were the last report gaps besides the supervisor name.
+**Evidence:** `report/DRAFT_REPORT.md` §4; `report/references/references.bib`.
+**Result (verified against web sources):**
+- Floods began ~14 June 2023; by 21 June 119,830 people across 20 districts affected (Baksa 26,571, Lakhimpur 25,096, Nalbari 44,707, Tamulpur 15,610); 30+ relief camps (2,091 people); North Lakhimpur 164 mm/24 h to 15 June.
+- CWC: rivers above danger mark in ≥6 locations by 22 June.
+- NRSC/ISRO map 29 June 2023: Kamrup Rural 10,195 ha + Kamrup Metro 946 ha.
+**Conclusion:** Only the supervisor name remains as a `[To verify]` placeholder.
+**Blockers:** Supervisor name (from authors).
+**Next:** Fill supervisor name; then run the bootstrap CI + build the GMM-4 confidence figure (step 3).
+
+---
