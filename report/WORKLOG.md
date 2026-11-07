@@ -258,3 +258,22 @@ Append one entry per working day. Keep each entry short and factual. This is the
 **Next:** Fill supervisor name; then run the bootstrap CI + build the GMM-4 confidence figure (step 3).
 
 ---
+
+## 2026-11-07 — Day 5 (validation visualization + cross-terrain)
+
+**Did:** Added `code/confidence/validation_viz.py` + `notebooks/07_validation_visualization.ipynb` (cloud removal, MNDWI reference, SAR flood, and TP/FP/FN agreement map), and `code/confidence/cross_terrain.py` + `notebooks/08_cross_terrain.ipynb` (fit thresholds on farmland vs urban, transfer them across terrains, measure the F1 drop). Notebooks render figures inline via `%matplotlib inline`.
+**Why:** Make the verification visually observable and test the cross-terrain generalization the authors proposed.
+**Evidence:**
+- `outputs/figures/validation_agreement.png`, `cross_terrain.png`
+- `outputs/tables/cross_terrain.csv`
+- `code/confidence/validation_viz.py`, `cross_terrain.py`
+- `notebooks/07_validation_visualization.ipynb`, `08_cross_terrain.ipynb`
+- `report/claims_ledger.md` C-020, C-021; `report/DRAFT_REPORT.md` §8
+**Result (verified):**
+- Validation (GMM ensemble vs S2): TP 769,405 / FP 161,621 / FN 190,390 / TN 4,428,616; precision 82.6%, recall 80.2%, F1 0.8138.
+- Cross-terrain: Otsu farm threshold −12.54 dB vs urban −2.91 dB (10 dB gap); transferring urban→farm drops F1 0.73→0.43 (gap ≈ 0.29); urban has ~no water (in-place F1 ≈ 0.003).
+**Conclusion:** Thresholds are terrain-specific and do not transfer across terrains — a quantified generalization failure that supports the earlier urban-Otsu observation.
+**Blockers:** None.
+**Next:** Supervisor name; bootstrap CI (still pending).
+
+---

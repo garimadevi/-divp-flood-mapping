@@ -18,6 +18,8 @@ work is visible and runnable step by step.
 | `04_confidence_agreement.ipynb` | `code/confidence/agreement.py` | Agreement k/N confidence map (High/Medium/Low/Dry) |
 | `05_validation.ipynb` | `code/confidence/validate.py` | S2 MNDWI validation: per-method and per-class metrics + reliability curve |
 | `06_alternative_members.ipynb` | `code/confidence/alternative_members.py` | Kittler & GMM as 4th member + leave-one-out ablation (ADR-23) |
+| `07_validation_visualization.ipynb` | `code/confidence/validation_viz.py` | Cloud removal, MNDWI reference, and the SAR-vs-S2 TP/FP/FN agreement map |
+| `08_cross_terrain.ipynb` | `code/confidence/cross_terrain.py` | Cross-terrain threshold generalization (farm vs urban) |
 
 ## Conventions
 
