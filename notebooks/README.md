@@ -17,6 +17,7 @@ work is visible and runnable step by step.
 | `03_flood_masks.ipynb` | `code/flood_masks/run_masks.py` | Four independent flood masks, cleaning, areas, pairwise kappa |
 | `04_confidence_agreement.ipynb` | `code/confidence/agreement.py` | Agreement k/N confidence map (High/Medium/Low/Dry) |
 | `05_validation.ipynb` | `code/confidence/validate.py` | S2 MNDWI validation: per-method and per-class metrics + reliability curve |
+| `06_alternative_members.ipynb` | `code/confidence/alternative_members.py` | Kittler & GMM as 4th member + leave-one-out ablation (ADR-23) |
 
 ## Conventions
 

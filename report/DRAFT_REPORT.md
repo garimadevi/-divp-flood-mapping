@@ -114,6 +114,8 @@ Reference hierarchy: Sentinel-2 MNDWI on clear pixels (primary), NRSC/ISRO offic
 | Otsu VH | −17.31 dB | 143.02 | 0.817 |
 | Change VV | −3.0 dB | 108.17 | 0.691 |
 | Adaptive VV | −9.57 dB (median local) | 5.63 | 0.052 |
+| Kittler–Illingworth | −14.02 dB | 97.78 | 0.775 |
+| GMM (2-component) | −10.27 dB | 145.87 | 0.801 |
 
 **Agreement confidence map.** Evidence: `outputs/tables/confidence_classes.csv`, `outputs/maps/confidence/agreement_classes.tif`.
 
@@ -126,7 +128,9 @@ Reference hierarchy: Sentinel-2 MNDWI on clear pixels (primary), NRSC/ISRO offic
 
 **Binary flood map (k ≥ 2, 122.59 km²).** Evidence: `outputs/tables/metrics_flood_binary.csv`. Precision 86.6%, recall 76.1%, F1 0.810, IoU 0.680, overall accuracy 93.8%.
 
-**Key finding (H1 rejected, then refined).** The 4-method reliability curve is non-monotonic: Medium (3/4) precision 88.6% > Low 82.9% > High 77.1%. H1 ("High-class precision exceeds Low-class precision") is **rejected** for the 4-method ensemble. The adaptive method (κ ≈ 0.06–0.08 vs the others) is a poor ensemble member: it is extremely conservative (5.63 km², 2.7% recall) and its false positives concentrate in the darkest pixels that the other methods also flag, so requiring all four to agree removes true water without removing false positives. Dropping the adaptive member restores monotonicity: the 3-method ensemble gives **high 88.4% > medium 82.6% > low 43.2%** — High (3/3) is now the most precise class — while the binary flood map is unchanged (F1 0.8094 vs 0.8097). Conclusion: agreement predicts reliability only with a well-chosen ensemble (ADR-22). Evidence: `outputs/tables/metrics_by_class.csv`, `outputs/tables/sensitivity_drop_adaptive.csv`, `outputs/figures/reliability_curve.png`; ADR-21, ADR-22.
+**Key finding (H1 rejected, then refined).** The 4-method reliability curve is non-monotonic: Medium (3/4) precision 88.6% > Low 82.9% > High 77.1%. H1 ("High-class precision exceeds Low-class precision") is **rejected** for the 4-method ensemble. The adaptive method (κ ≈ 0.06–0.08 vs the others) is a poor ensemble member: it is extremely conservative (5.63 km², 2.7% recall) and its false positives concentrate in the darkest pixels that the other methods also flag, so requiring all four to agree removes true water without removing false positives. Dropping the adaptive member restores monotonicity: the 3-method ensemble gives **high 88.4% > medium 82.6% > low 43.2%** — High (3/3) is now the most precise class — while the binary flood map is unchanged (F1 0.8094 vs 0.8097). Evidence: `outputs/tables/metrics_by_class.csv`, `outputs/tables/sensitivity_drop_adaptive.csv`, `outputs/figures/reliability_curve.png`; ADR-21, ADR-22.
+
+**Refined conclusion (alternative 4th member).** Replacing the adaptive member with a stronger classical method keeps four votes *and* restores monotonicity. Kittler–Illingworth (precision 92.5%, κ 0.803) and GMM (recall 81.5%, κ 0.829) both correlate strongly with the three good methods. The resulting 4-method ensembles are monotonic — Kittler: High 91.1% > Medium 88.5% > Low 56.1%; GMM: High 88.4% > Medium 83.7% > Low 45.6% — and GMM yields the best binary flood map (F1 0.8138, recall 80.2%). A leave-one-out ablation confirms the finding: dropping any of the three good methods breaks monotonicity and lowers F1, while only dropping adaptive is benign. Conclusion: **agreement predicts reliability when ensemble members genuinely measure the same signal (κ ≈ 0.8); it fails when a member is uncorrelated and low-recall (adaptive, κ ≈ 0.06).** Evidence: `outputs/tables/candidate_members.csv`, `ensemble_4th_member.csv`, `leave_one_out.csv`, `outputs/figures/alternative_members_reliability.png`; ADR-23.
 
 ---
 

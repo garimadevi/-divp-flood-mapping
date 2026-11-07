@@ -255,3 +255,16 @@ Decision rule: PASS if D1-D3 and the primary signal and optical gates hold; PASS
 **Decision:** Adopt the 3-method ensemble as the primary confidence rule. Report the 4-method result as the diagnostic that motivated the change, and the 3-method result as the final reliability curve. Keep the adaptive mask as a recorded (superseded) ensemble member, not as a confidence contributor.
 **Evidence:** `outputs/tables/sensitivity_drop_adaptive.csv`; `outputs/tables/sensitivity_drop_adaptive_binary.csv`; `code/confidence/sensitivity_drop_adaptive.py`.
 **Consequence:** The headline H1 finding is refined: agreement predicts reliability only with a well-chosen ensemble. Update DRAFT_REPORT Results and the reliability curve to the 3-method version; the 4-method non-monotonic curve is retained as the motivating diagnostic.
+
+---
+
+## ADR-23 — Replace the adaptive member with GMM (or Kittler); a monotonic 4-method ensemble is achievable
+**Status:** accepted
+**Context:** ADR-22 showed the adaptive member was the problem, but dropping it leaves only a 3-method ensemble. The question remained: can we keep four votes and still get a monotonic reliability curve, by replacing adaptive with a stronger classical method?
+**Result:** Two candidate replacements were built and tested — Kittler-Illingworth minimum-error threshold and a 2-component Gaussian-mixture (GMM) threshold — on post-event VV, with the same cleaning and domain as the other methods.
+- Per-method (vs S2 MNDWI): Kittler precision 92.5%, recall 66.7%, F1 0.775, kappa 0.803; GMM precision 78.8%, recall 81.5%, F1 0.801, kappa 0.829. Both correlate strongly with the three "good" methods (kappa ~0.8), unlike adaptive (kappa 0.06).
+- 4-method ensembles (3 good + candidate): adaptive is non-monotonic (High 77.1% < Medium 88.6%, F1 0.8097); **Kittler is monotonic** (High 91.1% > Medium 88.5% > Low 56.1%, F1 0.8095); **GMM is monotonic** (High 88.4% > Medium 83.7% > Low 45.6%, F1 0.8138).
+- Leave-one-out ablation: dropping any of the three "good" methods breaks monotonicity AND lowers F1 (Otsu VV → 0.693, Otsu VH → 0.675, change → 0.797); only dropping adaptive is monotonic (F1 0.8094).
+**Decision:** Adopt **GMM** as the 4th ensemble member: it restores a monotonic 4-method reliability curve while giving the best binary F1 (0.8138) and highest recall (80.2%). Kittler is noted as a strong alternative (highest single-method precision 92.5%, monotonic). The adaptive member is removed from the confidence rule (superseded by ADR-22).
+**Evidence:** `code/confidence/alternative_members.py`; `outputs/tables/candidate_members.csv`, `ensemble_4th_member.csv`, `leave_one_out.csv`; `outputs/figures/candidate_members.png`, `alternative_members_reliability.png`.
+**Consequence:** Final confidence rule is a 4-method ensemble (Otsu VV, Otsu VH, change VV, GMM), flood-positive k ≥ 2, monotonic High > Medium > Low reliability. Report this as the refined conclusion of H1: agreement predicts reliability when the ensemble members genuinely measure the same signal (kappa ≈ 0.8), and fails when a member is uncorrelated and low-recall (adaptive, kappa ≈ 0.06).

@@ -31,5 +31,8 @@ Status values: `planned`, `verified`, `rejected`.
 | C-014 | Binary flood mask (k≥2) vs S2 MNDWI: precision 86.6%, recall 76.1%, F1 0.810, IoU 0.680, OA 93.8% | `outputs/tables/metrics_flood_binary.csv` | verified |
 | C-015 | Dropping the adaptive member makes reliability monotonic: 3-method precision high 88.35% > medium 82.63% > low 43.2% (vs 4-method high 77.1% < medium 88.6%) | `outputs/tables/sensitivity_drop_adaptive.csv`; `code/confidence/sensitivity_drop_adaptive.py` | verified |
 | C-016 | Binary flood map is unchanged by dropping adaptive (F1 0.8094 vs 0.8097; IoU 0.6798 vs 0.6803), so adaptive is redundant for the flood mask but harmful for confidence ordering | `outputs/tables/sensitivity_drop_adaptive_binary.csv` | verified |
+| C-017 | Kittler & GMM per-method (vs S2 MNDWI): Kittler precision 92.5%, F1 0.775, kappa 0.803; GMM precision 78.8%, recall 81.5%, F1 0.801, kappa 0.829 — both strongly correlated with the 3 good methods, unlike adaptive (kappa 0.06) | `outputs/tables/candidate_members.csv`; `outputs/figures/candidate_members.png` | verified |
+| C-018 | 4-method ensemble is monotonic with GMM (high 88.4% > medium 83.7% > low 45.6%) or Kittler (high 91.1% > medium 88.5% > low 56.1%); GMM gives the best binary F1 0.8138 | `outputs/tables/ensemble_4th_member.csv`; `outputs/figures/alternative_members_reliability.png` | verified |
+| C-019 | Leave-one-out ablation: dropping any of the 3 good methods breaks monotonicity and lowers F1 (Otsu VV→0.693, Otsu VH→0.675, change→0.797); only dropping adaptive is monotonic (F1 0.8094) | `outputs/tables/leave_one_out.csv` | verified |
 
 **Rule:** if a row cannot be filled with a real path or citation, the claim is removed or tagged `[To verify]`.

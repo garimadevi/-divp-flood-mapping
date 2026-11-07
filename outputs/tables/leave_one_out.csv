@@ -1,0 +1,5 @@
+dropped,high_prec,medium_prec,low_prec,monotonic,binary_f1
+otsu_vv,0.7594,0.8513,0.6778,False,0.6927
+otsu_vh,0.7682,0.8805,0.7447,False,0.6753
+change_vv,0.763,0.9018,0.4942,False,0.7966
+adaptive_vv,0.8835,0.8263,0.432,True,0.8094

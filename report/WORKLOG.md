@@ -212,3 +212,23 @@ Append one entry per working day. Keep each entry short and factual. This is the
 **Next:** Commit the full riverine pivot + confidence/validation/sensitivity work.
 
 ---
+
+## 2026-11-07 — Day 5 (alternative 4th member: Kittler & GMM)
+
+**Did:** Added `code/confidence/alternative_members.py` + `notebooks/06_alternative_members.ipynb`. Built two candidate 4th methods (Kittler-Illingworth minimum-error threshold and a 2-component Gaussian-mixture threshold), compared them against adaptive for the 4-method ensemble, and ran a leave-one-out ablation over the four original methods.
+**Why:** ADR-22 showed the adaptive member was the problem; the open question was whether we can keep four votes *and* restore monotonicity by replacing adaptive with a stronger classical method.
+**Evidence:**
+- `code/confidence/alternative_members.py`, `notebooks/06_alternative_members.ipynb`
+- `outputs/tables/candidate_members.csv`, `ensemble_4th_member.csv`, `leave_one_out.csv`
+- `outputs/figures/candidate_members.png`, `alternative_members_reliability.png`
+- `outputs/maps/masks/kittler.tif`, `gmm.tif`
+- `report/decisions.md` ADR-23; `report/claims_ledger.md` C-017..C-019
+**Result (verified):**
+- Per-method: Kittler precision 92.5%, F1 0.775, κ 0.803; GMM recall 81.5%, F1 0.801, κ 0.829; both κ ≈ 0.8 vs the 3 good methods (adaptive κ 0.06).
+- 4-method ensembles: adaptive non-monotonic; Kittler monotonic (High 91.1% > Med 88.5% > Low 56.1%, F1 0.8095); GMM monotonic (High 88.4% > Med 83.7% > Low 45.6%, F1 0.8138).
+- Leave-one-out: dropping any good method breaks monotonicity and lowers F1 (0.69/0.68/0.80); only dropping adaptive is benign.
+**Conclusion:** Adopt GMM as the 4th member (monotonic + best F1 0.8138); Kittler is a strong alternative (highest precision). H1 conclusion refined: agreement predicts reliability when members are correlated (κ ≈ 0.8), fails when a member is uncorrelated/low-recall (κ ≈ 0.06).
+**Blockers:** None.
+**Next:** Commit.
+
+---

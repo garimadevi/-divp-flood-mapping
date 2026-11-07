@@ -1,0 +1,4 @@
+candidate_4th,high_prec,medium_prec,low_prec,monotonic,binary_f1,binary_precision,binary_recall
+adaptive_vv,0.7708,0.8858,0.8288,False,0.8097,0.8656,0.7606
+kittler,0.9107,0.8847,0.5607,True,0.8095,0.866,0.7599
+gmm,0.8835,0.8372,0.4557,True,0.8138,0.8264,0.8016
