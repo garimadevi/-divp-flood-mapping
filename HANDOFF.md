@@ -11,7 +11,11 @@
 Feed this file back to the assistant at the start of the next session.
 It contains every decision, verified data point, scope boundary, report outline, and open item discussed so far.
 
-**Next action after reading:** write `D:\DIVP PROJECT\report\Report_v1.md` as a 20–30 page proposal/synopsis, then convert it to PDF/DOCX. Do not fabricate results.
+**Execution view (read first):** `report/PROGRESS.md` is the living save point. It lists the step-by-step tracker, the current step, the next actions, and the session log. `HANDOFF.md` is the context behind it.
+
+**Step-by-step notebooks:** `notebooks/` contains cell-split views of the long pipeline scripts (`00_data_acquisition`, `01_event_signal_gate`, `02_build_stack`, `03_flood_masks`). The `.py` scripts in `code/` remain the canonical CLI.
+
+**Next action after reading:** follow `report/PROGRESS.md` §1 — Step 9, the agreement confidence map. Do not fabricate results.
 
 ---
 
@@ -543,6 +547,11 @@ Implications:
 D:\DIVP PROJECT\
   HANDOFF.md
   report\
+    PROGRESS.md          # step-by-step save point (read first)
+    WORKLOG.md
+    DRAFT_REPORT.md
+    decisions.md
+    claims_ledger.md
     Report_v1.md
     Report_v1.pdf
     Report_v1.docx
@@ -588,6 +597,12 @@ D:\DIVP PROJECT\
       sensitivity.py
     visualization\
       maps.py
+  notebooks\
+    00_data_acquisition.ipynb
+    01_event_signal_gate.ipynb
+    02_build_stack.ipynb
+    03_flood_masks.ipynb
+    04_confidence_agreement.ipynb   # next step
   outputs\
     maps\
     tables\
@@ -978,3 +993,39 @@ Start with:
 - Adaptive mask is conservative (0.424 km^2); consider k=1.2 or another local method if it is too sparse.
 - Sentinel-2 is 9 days after the event; the manual sample is the primary event-water reference.
 - Supervisor name and report template are still `[To verify]`.
+
+---
+
+## 20. Session log — 6 November 2026 (workflow restructuring)
+
+### 20.1 What changed
+
+- Added `report/PROGRESS.md` as the **living save point**: step tracker, current step, next actions, session log. Read this first in future sessions; `HANDOFF.md` stays the full context.
+- Added `notebooks/` with cell-by-cell views of the long pipeline scripts:
+  - `00_data_acquisition.ipynb` (stac_manifest + fetch_subsets + check_coverage)
+  - `01_event_signal_gate.ipynb` (day3_gate + candidate_events + candidate_s2)
+  - `02_build_stack.ipynb` (build_stack)
+  - `03_flood_masks.ipynb` (run_masks)
+- The `.py` scripts were **not changed and not removed**; they remain the canonical CLI.
+- Added `notebooks/README.md` (conventions + how to run).
+
+### 20.2 Why
+
+- Make the work visible step by step instead of one opaque internal run.
+- Persist the working state in files because opencode session persistence is not available yet.
+- Keep the notebooks and scripts in sync: two views, one source of truth.
+
+### 20.3 Current state after this session
+
+- No data, mask, or result files were changed.
+- Notebooks validate as JSON and parse as Python.
+- Jupyter/ipykernel are **not installed** in `.venv`; see `report/PROGRESS.md` §4 for the install command.
+- Current step is still **Step 9 — agreement confidence map**.
+
+### 20.4 Next actions (supersedes §19.3)
+
+1. Create `code/confidence/agreement.py` and mirror it in `notebooks/04_confidence_agreement.ipynb`.
+2. Build the k/N confidence classes and save GeoTIFF + class stats + figure.
+3. Record the Otsu VV/VH redundancy decision (κ = 0.946) in `decisions.md`.
+4. Move to validation (Step 11), then update `DRAFT_REPORT.md` and `claims_ledger.md`.
+5. Commit Day 3–4 work; update `report/PROGRESS.md` after each step.

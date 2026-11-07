@@ -189,3 +189,69 @@ Pixels with k >= 2 are treated as flood-positive for the confidence analysis.
 **Rationale:** Produces an independent but conservative mask (0.424 km^2); kappa vs the other masks is 0.04-0.07.
 **Evidence:** `outputs/tables/mask_stats.csv`; `outputs/tables/mask_kappa.csv`.
 **Consequence:** Keep the method as an independent ensemble member and report its conservatism. Otsu VV vs VH kappa is 0.946, so that pair is redundant; decide whether to keep both or replace Otsu VH with VH change detection.
+
+---
+
+## ADR-19 — 18 May 2023 candidate gate (pre-registered)
+**Status:** accepted (FAIL)
+**Context:** The 31 May 2025 ensemble does not detect urban flood water: High (4/4) class is 0.094 km², 0% urban, 0.5% S2-water recall; the Low (2/4) class is more water-like than High. S1 post was 2 days late and S2 was 9 days late with no pre-event optical. Before committing the report to any event, gate a better event.
+**Decision:** Gate the 18 May 2023 event (night of 17 May; waterlogging in Rukminigaon, Chandmari, Jatia) with the following data package, before reconfiguring anything.
+- Primary S1 pair (ascending rel41): pre 6 May `S1A_IW_GRDH_1SDV_20230506T115713_20230506T115738_048413_05D2C3_rtc`, post 18 May `S1A_IW_GRDH_1SDV_20230518T115713_20230518T115738_048588_05D805_rtc` (~18 h lag).
+- Robustness S1 pair (descending rel77): pre 8 May `S1A_IW_GRDH_1SDV_20230508T234721_20230508T234746_048449_05D3FE_rtc`, post 20 May `S1A_IW_GRDH_1SDV_20230520T234722_20230520T234747_048624_05D927_rtc` (~2.5 d lag).
+- Sentinel-2 (T46RCP only, 97.6% AOI): pre 16 May `S2B_MSIL2A_20230516T042709_R133_T46RCP_20230516T082209` (12.23% cloud), post 21 May `S2A_MSIL2A_20230521T042711_R133_T46RCP_20230521T102617` (42.33% cloud).
+
+Hard data gates (D1-D3): D1 primary pair same-orbit with post lag <= 24 h; D2 S2 post clear fraction >= 0.30 on `base & slope_ok`; D3 S2 pre clear fraction >= 0.50 on `base & slope_ok`.
+Primary signal/optical gates: S1 `floodlike_clean_urban >= 0.05 km²` on the rel41 pair; and optical (S2 16->21 May urban water increase >= 0.05 km² OR SAR flood-like precision vs S2 water >= 0.50).
+Decision rule: PASS if D1-D3 and the primary signal and optical gates hold; PASS WITH CAVEAT if the primary passes but the rel77 pair does not agree (report as transient); FAIL otherwise, record the negative and pivot to surface-water mapping.
+**Rationale:** Same-day S1 plus pre/post optical and two independent orbits is the strongest package found; it avoids repeating the 2025 optical gap.
+**Evidence:** `code/preprocessing/candidate_may2023.py`; `outputs/tables/candidate_may2023_gate.csv`; `data/candidates/may2023/candidate_manifest.json`.
+**Consequence:** If PASS, reconfigure config/pipeline to 18 May 2023 and rerun notebooks 00-03. If FAIL, pivot to surface-water mapping.
+
+**Result (2026-11-06): FAIL.**
+- D1 PASS, D2 PASS (post clear 0.948), D3 PASS (pre clear 0.840).
+- Signal FAIL: rel41 `floodlike_clean_urban = 0.000 km²` (and rel77 = 0.000 km²); the `dark16 & change` core does not survive the 100-px cleaning.
+- Urban change < −2 dB is present (8.75 km² rel41, 7.70 km² rel77) but fragmented: ~24,000 components, largest only 0.008 km² (rel41) / 0.021 km² (rel77).
+- Urban dark < −16 dB is essentially absent: 0.008 km² (rel41) / 0.054 km² (rel77).
+- Optical FAIL on the water-increase arm: S2 non-permanent water fell 1.908 → 0.502 km² (−1.405 km²); urban water fell 0.476 → 0.090 km² (−0.385 km²). No persistent urban water increase.
+- Cross-orbit agreement FAIL: urban-change Jaccard 0.0594; the two independent SAR pairs do not agree on changed pixels, so the change signal is noise/orbit-dominated, not a coherent flood.
+- Verdict: the 18 May 2023 event is too small and too transient for 10 m SAR and was gone before the 21 May S2. The pre-registered decision rule requires a pivot to surface-water mapping.
+**Evidence (generated):** `data/candidates/may2023/`, `outputs/tables/candidate_may2023_gate.csv`, `outputs/tables/candidate_may2023_components.csv`, `outputs/figures/candidate_may2023.png`, `code/preprocessing/candidate_may2023.py`.
+
+---
+
+## ADR-20 — Pivot to riverine flood (Brahmaputra, June 2023), wider AOI
+**Status:** accepted
+**Context:** Urban flash floods in central Guwahati are not detectable in C-band SAR: the 18 May 2023 gate FAILed (no coherent urban flood, optical water decreased), and the operational Copernicus GFM product returns all-nodata over the urban AOI (its exclusion mask covers built-up areas). Riverine/seasonal water, by contrast, is reliably mapped by our own masks (86% S2-water recall) and by official products.
+**Decision:** Pivot the study to the **Brahmaputra riverine flood of late June 2023** over a widened south-bank AOI that includes the river, Deepor Beel, the floodplain, and Guwahati city.
+- AOI (WGS84): `[91.55, 26.00, 91.95, 26.30]` (~1,356 km²), name "Guwahati / Brahmaputra floodplain".
+- Sentinel-1 (same-orbit ascending rel41): pre 11 June `S1A_IW_GRDH_1SDV_20230611T115714_20230611T115739_048938_05E286_rtc`, post 23 June `S1A_IW_GRDH_1SDV_20230623T115715_20230623T115740_049113_05E7DB_rtc`.
+- Sentinel-2 (25 June, mosaicked): `S2B_MSIL2A_20230625T042709_R133_T46RCQ_20230625T090934` (33.2% cloud) + `S2B_MSIL2A_20230625T042709_R133_T46RCP_20230625T092053` (51.7% cloud).
+- Reference: NRSC/ISRO flood map 29 June 2023 (Kamrup Rural 10,195 ha + Kamrup Metro 946 ha inundated); GFM static reference-water mask (134 km² permanent/seasonal water in the AOI) as permanent-water context. GFM per-acquisition flood extent is nodata over this region and is therefore NOT used as a reference.
+**Pre-registered gate (feasibility already measured):**
+- D1 same-orbit S1 pair (rel41, 11→23 June): PASS.
+- D2 S2 clear fraction ≥ 0.50 over the AOI: PASS (0.771).
+- Signal: new dark water (post < −16 dB AND pre not dark) ≥ 5 km² and spatially coherent along river/floodplain: PASS (90.84 km² new dark; 131.53 km² dark&change).
+- Optical: S2 MNDWI water ≥ 20 km² and SAR new-dark overlaps S2 water substantially: PASS (171.34 km² S2 water; 16.4% of clear pixels).
+**Rationale:** Riverine floodwater is large, persistent, and dark — detectable and validatable. This keeps the flood topic and the agreement-confidence methodology, on a flood that actually exists.
+**Evidence:** `code/preprocessing/candidate_may2023.py` (diagnostic pattern); feasibility probe outputs (recorded in claims ledger D-008..D-010); NRSC 2023 flood reports.
+**Consequence:** Reconfigure `config.yaml` (AOI, event, S1/S2 items), refetch the wider-AOI data tree, rerun notebooks 00-03, rebuild the agreement confidence map, and validate against S2 MNDWI + NRSC + GFM reference water. Urban flash-flood attempts (20 Apr 2026, 31 May 2025, 18 May 2023) are retained as documented negative results.
+
+---
+
+## ADR-21 — Confidence reliability is non-monotonic; the adaptive member degrades High
+**Status:** accepted
+**Context:** After the riverine pivot (ADR-20), the four-mask agreement map was validated against Sentinel-2 MNDWI water (clear pixels, non-permanent). The pre-registered rule (ADR-04) assumed more agreement = higher confidence.
+**Result:** The reliability curve is non-monotonic: observed precision Medium (3/4) = 88.6% > Low (2/4) = 82.9% > High (4/4) = 77.1% > Dry (0-1) = 4.9%. H1 ("High-class precision exceeds Low-class precision") is REJECTED: the High class is less precise than the Medium class.
+**Rationale:** The adaptive method (pairwise kappa 0.06-0.08 vs the other three) is a poor ensemble member: it is extremely conservative (5.63 km², 2.7% recall) and its false positives concentrate in the darkest pixels that the other methods also flag, so requiring all four to agree removes true water without removing false positives.
+**Evidence:** `outputs/tables/metrics_by_class.csv`; `outputs/figures/reliability_curve.png`; `code/confidence/validate.py`.
+**Consequence:** Report the non-monotonicity as a finding. Recommend dropping the adaptive member and using 3-method agreement (High = 3/3) as the confidence rule, or re-weighting members by pairwise agreement. The binary flood mask (k >= 2) is already strong: F1 0.81, IoU 0.68, precision 86.6%, recall 76.1% vs S2 MNDWI.
+
+---
+
+## ADR-22 — Drop the adaptive member (3-method ensemble) as the confidence rule
+**Status:** accepted
+**Context:** ADR-21 found the 4-method reliability curve non-monotonic (High less precise than Medium) and attributed it to the adaptive member. The recommendation was tested by re-running the confidence analysis on the 3-method ensemble (Otsu VV, Otsu VH, change VV) against the same Sentinel-2 MNDWI reference.
+**Result:** Dropping the adaptive member restores monotonicity. 3-method per-class precision: dry 3.3%, low 43.2%, medium 82.6%, high 88.4% — High (3/3) is now the most precise class, and the ordering High > Medium > Low holds. The binary flood map is essentially unchanged (F1 0.8094 vs 0.8097; IoU 0.6798 vs 0.6803), confirming the adaptive method contributes nothing to the flood map while degrading the confidence ordering.
+**Decision:** Adopt the 3-method ensemble as the primary confidence rule. Report the 4-method result as the diagnostic that motivated the change, and the 3-method result as the final reliability curve. Keep the adaptive mask as a recorded (superseded) ensemble member, not as a confidence contributor.
+**Evidence:** `outputs/tables/sensitivity_drop_adaptive.csv`; `outputs/tables/sensitivity_drop_adaptive_binary.csv`; `code/confidence/sensitivity_drop_adaptive.py`.
+**Consequence:** The headline H1 finding is refined: agreement predicts reliability only with a well-chosen ensemble. Update DRAFT_REPORT Results and the reliability curve to the 3-method version; the 4-method non-monotonic curve is retained as the motivating diagnostic.

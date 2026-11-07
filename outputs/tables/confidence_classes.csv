@@ -1,0 +1,5 @@
+class,k,area_km2,fraction_of_domain
+dry,0-1,604.759,0.83145
+low,2,33.925,0.04664
+medium,3,84.765,0.11654
+high,4,3.905,0.00537

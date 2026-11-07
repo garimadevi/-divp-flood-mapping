@@ -1,0 +1,6 @@
+metric,value
+precision,0.8656
+recall,0.7606
+f1,0.8097
+iou,0.6803
+overall_accuracy,0.9382

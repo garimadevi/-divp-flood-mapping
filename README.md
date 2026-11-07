@@ -6,18 +6,21 @@
 
 ## What this project does
 
-Processes a Sentinel-1 RTC pair (8 April 2026 pre-event, 20 April 2026 post-event) over Guwahati / the Bharalu basin with several independent flood-segmentation methods, combines them into an agreement-based confidence map (High / Medium / Low / Dry), and tests whether higher agreement corresponds to higher classification accuracy.
+Processes a Sentinel-1 RTC pair (21 May 2025 pre-event, 2 June 2025 post-event) over Guwahati / the Bharalu basin with several independent flood-segmentation methods, combines them into an agreement-based confidence map (High / Medium / Low / Dry), and tests whether higher agreement corresponds to higher classification accuracy.
 
 ## Status
 
-Day 3 complete: 31 May 2025 event, analysis-ready stack built, four flood masks + kappa diagnostics done. The 20 Apr 2026 event is retained as a documented negative result. Agreement confidence and validation are next.
+Step 9 of the execution plan: the 31 May 2025 event passes the signal gate, the analysis-ready stack is built, and four flood masks + kappa diagnostics are done. The 20 Apr 2026 event is retained as a documented negative result. Agreement confidence and validation are next.
+
+**Read `report/PROGRESS.md` first** — it is the step-by-step save point.
 
 ## Layout
 
 ```
-report/       living draft, work log, ADRs, claims ledger, references
+report/       PROGRESS.md (save point), living draft, work log, ADRs, claims ledger, references
 data/         raw and processed data (large files not committed)
 code/         config, preprocessing, flood masks, confidence, validation
+notebooks/    cell-by-cell views of the long pipeline scripts
 outputs/      generated maps, tables, figures
 app/          Streamlit demo
 ```
@@ -32,9 +35,14 @@ app/          Streamlit demo
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
-python code\preprocessing\fetch_manifest.py
-python code\preprocessing\preprocess.py
+python code\preprocessing\stac_manifest.py
+python code\preprocessing\fetch_subsets.py
+python code\preprocessing\check_coverage.py
+python code\preprocessing\build_stack.py
+python code\flood_masks\run_masks.py
 ```
+
+Or run the matching notebooks in `notebooks/` cell by cell (see `notebooks/README.md`).
 
 ## Rules
 

@@ -2,7 +2,7 @@
 # Do not hard-code AOI, dates, item IDs, thresholds or paths elsewhere.
 
 project:
-  title: "Multi-Method Urban Flood Segmentation and Agreement-Based Confidence Estimation Using Sentinel-1 SAR Imagery"
+  title: "Multi-Method Flood Segmentation and Agreement-Based Confidence Estimation Using Sentinel-1 SAR Imagery"
   authors:
     - name: "Garima Devi"
       roll: "240101007"
@@ -19,20 +19,21 @@ paths:
   manifest: "data/manifest.json"
 
 event:
-  # Pivoted on Day 3: the 20 Apr 2026 pass failed the flood-signal gate.
-  name: "Guwahati flood, 31 May 2025"
-  pre_date: "2025-05-21"
-  post_date: "2025-06-02"
+  # ADR-20: pivoted to the Brahmaputra riverine flood (late June 2023).
+  # Urban flash-flood attempts (20 Apr 2026, 31 May 2025, 18 May 2023) failed the gate.
+  name: "Brahmaputra riverine flood, 23 June 2023"
+  pre_date: "2023-06-11"
+  post_date: "2023-06-23"
   fallback:
-    name: "Guwahati flood, 19-20 May 2025"
-    pre_date: "2025-05-07"
-    post_date: "2025-05-19"
-    note: "Official NER-DRR map exists, but S2 on 20 May 2025 is ~100% cloud."
+    name: "Guwahati urban flood, 31 May 2025"
+    pre_date: "2025-05-21"
+    post_date: "2025-06-02"
+    note: "Retained as a documented negative result; S1 post 2 Jun + S2 9 Jun."
 
 aoi:
-  # W, S, E, N in WGS84
-  bbox: [91.68, 26.10, 91.85, 26.22]
-  name: "Guwahati / Bharalu basin"
+  # W, S, E, N in WGS84 (ADR-20: widened to the south-bank Brahmaputra floodplain)
+  bbox: [91.55, 26.00, 91.95, 26.30]
+  name: "Guwahati / Brahmaputra floodplain"
 
 grid:
   crs: "EPSG:32646"
@@ -56,17 +57,17 @@ stac:
     worldcover: "map"
 
 items:
-  # Verified against the live STAC API on 2026-11-05 (event pivot).
-  s1_rtc_pre: "S1A_IW_GRDH_1SDV_20250521T234717_20250521T234742_059299_075C07_rtc"
-  s1_rtc_post: "S1A_IW_GRDH_1SDV_20250602T234717_20250602T234742_059474_rtc"
+  # Verified against the live STAC API on 2026-11-07 (ADR-20 riverine pivot).
+  s1_rtc_pre: "S1A_IW_GRDH_1SDV_20230611T115714_20230611T115739_048938_05E286_rtc"
+  s1_rtc_post: "S1A_IW_GRDH_1SDV_20230623T115715_20230623T115740_049113_05E7DB_rtc"
   # GRD is not used in the 2-week RTC-first build.
   s1_grd_pre: null
   s1_grd_post: null
-  # The AOI (N 26.22) straddles two MGRS tiles, so both are fetched and mosaicked.
+  # The widened AOI straddles two MGRS tiles, so both are fetched and mosaicked.
   s2_post_tiles:
-    - "S2C_MSIL2A_20250609T042721_R133_T46RCQ_20250609T090214"
-    - "S2C_MSIL2A_20250609T042721_R133_T46RCP_20250609T090214"
-  s2_post: "S2C_MSIL2A_20250609T042721_R133_T46RCP_20250609T090214"
+    - "S2B_MSIL2A_20230625T042709_R133_T46RCQ_20230625T090934"
+    - "S2B_MSIL2A_20230625T042709_R133_T46RCP_20230625T092053"
+  s2_post: "S2B_MSIL2A_20230625T042709_R133_T46RCQ_20230625T090934"
   dem: "Copernicus_DSM_COG_10_N26_00_E091_00_DEM"
   jrc_water: "90E_30Nv1_3_2020"
   worldcover: "ESA_WorldCover_10m_2021_v200_N24E090"

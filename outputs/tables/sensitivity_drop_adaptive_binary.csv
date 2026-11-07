@@ -1,0 +1,11 @@
+ensemble,metric,value
+4-method,precision,0.8656
+3-method,precision,0.8661
+4-method,recall,0.7606
+3-method,recall,0.7597
+4-method,f1,0.8097
+3-method,f1,0.8094
+4-method,iou,0.6803
+3-method,iou,0.6798
+4-method,overall_accuracy,0.9382
+3-method,overall_accuracy,0.9381

@@ -123,3 +123,92 @@ Append one entry per working day. Keep each entry short and factual. This is the
 **Next:** Build the agreement confidence map; then decide whether to keep both Otsu variants or replace Otsu VH with a VH change method.
 
 ---
+
+## 2026-11-06 — Day 4 (workflow restructuring)
+
+**Did:** Read the full handoff and reorganised the working process for visibility. Added `report/PROGRESS.md` (step tracker, current step, next actions, session log) and `notebooks/` with cell-by-cell views of the long pipeline scripts (`00_data_acquisition`, `01_event_signal_gate`, `02_build_stack`, `03_flood_masks`). Kept every `.py` unchanged as the canonical CLI. Added `notebooks/README.md`.
+**Why:** Make progress visible step by step and persist the working state in files while opencode session persistence is unavailable.
+**Evidence:** `report/PROGRESS.md`, `notebooks/README.md`, `notebooks/*.ipynb`. No data, mask, or result files were changed.
+**Blockers:** None. Jupyter/ipykernel are not installed in `.venv`; install command is in `PROGRESS.md` §4.
+**Next:** Step 9 — agreement confidence map (`code/confidence/agreement.py` + `notebooks/04_confidence_agreement.ipynb`), then the Otsu redundancy decision. Commit Day 3–4 work.
+
+---
+
+## 2026-11-06 — Day 4 (event search & 18 May 2023 gate)
+
+**Did:** Searched reported Guwahati flood dates and checked STAC availability; identified 18 May 2023 as the strongest candidate (two same-orbit S1 pairs + pre/post S2). Pre-registered the gate as ADR-19, added `code/preprocessing/candidate_may2023.py`, fetched both S1 pairs and S2 16/21 May, and ran the gate.
+**Why:** The 31 May 2025 ensemble does not detect urban flood water (High class 0% urban, Low more water-like than High); a better event was needed before committing the report.
+**Evidence:**
+- `code/preprocessing/candidate_may2023.py`
+- `data/candidates/may2023/` + `candidate_manifest.json`
+- `outputs/tables/candidate_may2023_gate.csv`, `candidate_may2023_components.csv`
+- `outputs/figures/candidate_may2023.png`
+- `report/decisions.md` ADR-19; `report/claims_ledger.md` D-005..D-007
+**Result (FAIL, diagnostic):**
+- Data gates pass: rel41 same-orbit, post ~18 h; S2 post clear 0.948, pre clear 0.840.
+- Signal gate fails: rel41 flood-like clean 0.000 km² (urban 0.000); urban change < −2 dB 8.75 km² but fragmented (largest component 0.008 km²); urban dark < −16 dB only 0.008 km².
+- Optical gate fails on water increase: S2 non-perm water 1.908→0.502 km² (−1.405); urban 0.476→0.090 km² (−0.385).
+- Cross-orbit urban-change Jaccard 0.0594 — the two pairs disagree, so the change signal is noise-dominated.
+**Conclusion:** 18 May 2023 is too small/transient for 10 m SAR. Per the pre-registered rule, pivot to surface-water mapping (the methods do map water reliably: Otsu VV/VH have 86% S2-water recall, 67% precision).
+**Blockers:** None.
+**Next:** Confirm the surface-water pivot scope (ADR-20), then re-scope config/notebooks/report and rebuild.
+
+---
+
+## 2026-11-07 — Day 5 (riverine-flood pivot)
+
+**Did:** Researched alternative datasets. Found (1) Copernicus Global Flood Monitoring (GFM) — free operational 3-algorithm Sentinel-1 flood ensemble with a likelihood layer, STAC at `stac.eodc.eu`; (2) official NRSC/ISRO + NESAC/NER-DRR Sentinel-1/RISAT/ALOS-2 flood maps of Assam. Verified GFM flood/water/likelihood layers are all-nodata over the Guwahati urban AOI (urban exclusion mask), so GFM is not usable as a flood reference here. Verified the June 2023 Brahmaputra riverine flood is strongly detectable with our own sensors.
+**Why:** The urban flash-flood target is a dead end (our gates + GFM's urban exclusion). Riverine flood is large, persistent, and detectable.
+**Evidence:**
+- `report/decisions.md` ADR-20; `report/claims_ledger.md` D-008..D-010
+- Feasibility probe over wider AOI `[91.55, 26.00, 91.95, 26.30]` (~1,356 km²)
+**Result (diagnostic, pre-gate):**
+- S1 rel41 11→23 June 2023: 90.84 km² new dark water; 131.53 km² dark&change.
+- S2 25 June 2023: clear 0.771; MNDWI water 171.34 km² (16.4% of clear).
+- GFM reference water (static): 134.14 km² permanent/seasonal water.
+- NRSC 29 June 2023: Kamrup Rural 10,195 ha + Kamrup Metro 946 ha inundated.
+**Conclusion:** Pivot to the June 2023 riverine flood over the wider AOI (ADR-20). Event passes the pre-registered gate.
+**Blockers:** None.
+**Next:** Reconfigure `config.yaml` (AOI, event, S1/S2 items), refetch the wider-AOI tree, rerun notebooks 00-03, rebuild the agreement confidence map, validate vs S2 MNDWI + NRSC + GFM reference water.
+
+---
+
+## 2026-11-07 — Day 5 (riverine reconfiguration + confidence + validation)
+
+**Did:** Reconfigured `config.yaml` to the June 2023 riverine event and the wider AOI `[91.55, 26.00, 91.95, 26.30]` (~1,356 km²). Refetched the full data tree (S1 11/23 June rel41, S2 25 June mosaic, DEM/JRC/WorldCover), rebuilt the stack and the four masks, then built the agreement confidence map (`code/confidence/agreement.py`) and validated it against S2 MNDWI (`code/confidence/validate.py`).
+**Why:** Execute ADR-20 and deliver the core confidence deliverable on a real, detectable flood.
+**Evidence:**
+- `code/config/config.yaml`, `data/manifest.json` (regenerated)
+- `outputs/maps/masks/`, `outputs/maps/confidence/agreement_classes.tif`, `agreement_flood.tif`
+- `outputs/tables/mask_stats.csv`, `mask_kappa.csv`, `confidence_classes.csv`, `metrics_by_method.csv`, `metrics_by_class.csv`, `metrics_flood_binary.csv`
+- `outputs/figures/masks_overview.png`, `confidence_map.png`, `reliability_curve.png`
+- `code/confidence/agreement.py`, `code/confidence/validate.py`
+- `report/decisions.md` ADR-20, ADR-21; `report/claims_ledger.md` C-003..C-007, C-013, C-014
+**Results (verified):**
+- Masks: Otsu VV 111.75 / Otsu VH 143.02 / change 108.17 / adaptive 5.63 km².
+- Binary flood (k≥2) vs S2 MNDWI: precision 86.6%, recall 76.1%, F1 0.810, IoU 0.680, OA 93.8%.
+- Per-method F1: Otsu VH 0.817, Otsu VV 0.797, change 0.691, adaptive 0.052.
+- Reliability (class precision): dry 4.9%, low 82.9%, medium 88.6%, high 77.1% — non-monotonic; H1 rejected (ADR-21).
+**Conclusion:** The riverine flood pipeline produces a strong, validated result. The confidence rule needs revision: the adaptive member degrades the High class; recommend 3-method agreement (drop adaptive) or re-weighting.
+**Blockers:** None.
+**Next:** Regenerate the masks/confidence notebooks (00-04) to mirror the new event; update DRAFT_REPORT and PROGRESS; fix the notebook 03 base-domain discrepancy; commit.
+
+---
+
+## 2026-11-07 — Day 5 (sensitivity check: drop adaptive)
+
+**Did:** Added `code/confidence/sensitivity_drop_adaptive.py` and re-measured the confidence classes on the 3-method ensemble (Otsu VV, Otsu VH, change VV), dropping the adaptive member.
+**Why:** Test ADR-21's claim that the adaptive member causes the non-monotonic reliability curve.
+**Evidence:**
+- `code/confidence/sensitivity_drop_adaptive.py`
+- `outputs/tables/sensitivity_drop_adaptive.csv`, `sensitivity_drop_adaptive_binary.csv`
+- `report/decisions.md` ADR-22; `report/claims_ledger.md` C-015, C-016
+**Result (verified):**
+- 4-method: high 77.1% < medium 88.6% (non-monotonic).
+- 3-method: high 88.4% > medium 82.6% > low 43.2% — monotonic; High (3/3) is now the most precise class.
+- Binary flood map unchanged: F1 0.8094 vs 0.8097; IoU 0.6798 vs 0.6803.
+**Conclusion:** Dropping the adaptive member restores a monotonic reliability curve and confirms the adaptive member was harmful to confidence ordering while adding nothing to the flood mask. Adopt 3-method agreement as the primary confidence rule (ADR-22).
+**Blockers:** None.
+**Next:** Commit the full riverine pivot + confidence/validation/sensitivity work.
+
+---

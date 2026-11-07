@@ -160,7 +160,7 @@ def main() -> int:
     for ax in axes.ravel():
         ax.set_xticks([])
         ax.set_yticks([])
-    fig.suptitle("Flood mask ensemble — 31 May 2025 event (diagnostic)")
+    fig.suptitle(f"Flood mask ensemble — {cfg['event']['name']} (diagnostic)")
     fig.tight_layout()
     fig_path = rel_path(cfg, "outputs") / "figures" / "masks_overview.png"
     fig.savefig(fig_path, dpi=140)
