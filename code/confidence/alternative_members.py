@@ -332,6 +332,31 @@ def main() -> int:
     fig.savefig(figures / "alternative_members_reliability.png", dpi=140)
     plt.close(fig)
 
+    # (c) all-method mask overview (input + 6 masks + GMM-4-method agreement count)
+    panels6 = [
+        (np.where(valid, post_vv, np.nan), "Post-event VV (dB)", "gray", -22, 0),
+        (all_masks["otsu_vv"], "Otsu VV", "Blues", 0, 1),
+        (all_masks["otsu_vh"], "Otsu VH", "Blues", 0, 1),
+        (all_masks["change_vv"], "Change VV", "Blues", 0, 1),
+        (all_masks["adaptive_vv"], "Adaptive VV", "Blues", 0, 1),
+        (all_masks["kittler"], "Kittler", "Blues", 0, 1),
+        (all_masks["gmm"], "GMM", "Blues", 0, 1),
+        (good_masks["otsu_vv"].astype(int) + good_masks["otsu_vh"].astype(int)
+         + good_masks["change_vv"].astype(int) + candidate_masks["gmm"].astype(int),
+         "Agreement count (OtsuVV+OtsuVH+change+GMM)", "viridis", 0, 4),
+    ]
+    fig, axes = plt.subplots(2, 4, figsize=(18, 9))
+    for ax, (data, title, cmap, vmin, vmax) in zip(axes.ravel(), panels6):
+        im = ax.imshow(data, cmap=cmap, vmin=vmin, vmax=vmax)
+        ax.set_title(title, fontsize=9)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    fig.suptitle(f"All flood masks (including Kittler & GMM) — {cfg['event']['name']}")
+    fig.tight_layout()
+    fig.savefig(figures / "masks_overview_6methods.png", dpi=140)
+    plt.close(fig)
+
     # ---- write tables + recommendation ----
     with open(tables / "candidate_members.csv", "w", newline="", encoding="utf-8") as h:
         w = csv.DictWriter(h, fieldnames=list(method_rows[0].keys()))
