@@ -17,6 +17,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "preprocessing"))
 
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import numpy as np
 import rasterio
 
@@ -144,6 +148,42 @@ def main() -> int:
 
     print("\nWrote outputs/tables/sensitivity_drop_adaptive.csv")
     print("Wrote outputs/tables/sensitivity_drop_adaptive_binary.csv")
+
+    # ---- figure: side-by-side reliability curves ----
+    order = ["dry", "low", "medium", "high"]
+    labels = ["Dry", "Low", "Medium", "High"]
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5.5), sharey=True)
+    for ax, p, title, ok in (
+        (axes[0], p4, "4-method ensemble (with adaptive)", not (p4["high"] > p4["medium"])),
+        (axes[1], p3, "3-method ensemble (adaptive removed)", p3["high"] > p3["medium"]),
+    ):
+        vals = [p[c] for c in order]
+        ax.plot(labels, vals, "o-", color="tab:blue", lw=2, markersize=9)
+        for x, v in zip(labels, vals):
+            ax.text(x, v, f"{v * 100:.1f}%", ha="center", va="bottom",
+                    fontsize=9, fontweight="bold")
+        ax.set_title(title, fontsize=11)
+        ax.set_ylabel("Observed precision (vs S2 water)")
+        ax.set_xlabel("Confidence class")
+        ax.set_ylim(0, 1.05)
+        ax.grid(alpha=0.3)
+        # emphasise the High vs Medium comparison
+        if ok:
+            ax.annotate("High is most precise\n(monotonic ✓)", xy=(3, vals[3]),
+                        xytext=(2.3, vals[3] - 0.28), fontsize=9,
+                        arrowprops=dict(arrowstyle="->", color="green"), color="green")
+        else:
+            ax.annotate("High drops below Medium\n(non-monotonic ✗)", xy=(3, vals[3]),
+                        xytext=(1.7, vals[3] - 0.30), fontsize=9,
+                        arrowprops=dict(arrowstyle="->", color="red"), color="red")
+    fig.suptitle("Reliability curve: does more agreement mean more precision?",
+                 fontsize=12)
+    fig.tight_layout()
+    fig_path = rel_path(cfg, "outputs") / "figures" / "sensitivity_drop_adaptive.png"
+    fig.savefig(fig_path, dpi=140)
+    plt.close(fig)
+    print(f"Wrote {fig_path}")
+
     return 0
 
 
