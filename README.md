@@ -1,51 +1,97 @@
-# DIVP Mini-Project — Guwahati Flood Confidence Mapping
+# DIVP Mini-Project — Brahmaputra Flood Confidence Mapping
 
-**Title:** Multi-Method Urban Flood Segmentation and Agreement-Based Confidence Estimation Using Sentinel-1 SAR Imagery
+**Title:** Multi-Method Flood Segmentation and Agreement-Based Confidence Estimation Using Sentinel-1 SAR Imagery
 
 **Authors:** Garima Devi (240101007), Pritom Sarma (240101013) — ECE, GUIST, Gauhati University
+**Supervisor:** Jyoti Prakash Medhi
 
 ## What this project does
 
-Processes a Sentinel-1 RTC pair (21 May 2025 pre-event, 2 June 2025 post-event) over Guwahati / the Bharalu basin with several independent flood-segmentation methods, combines them into an agreement-based confidence map (High / Medium / Low / Dry), and tests whether higher agreement corresponds to higher classification accuracy.
+Maps the **Brahmaputra riverine flood of late June 2023** over a widened Guwahati
+floodplain AOI from Sentinel-1 SAR, using several independent classical
+segmentation methods (Otsu VV/VH, change detection, adaptive, Kittler–Illingworth,
+Gaussian-mixture), and combines them into a **per-pixel agreement-based confidence
+map** (High / Medium / Low / Dry). It then tests whether "how many methods agree"
+is a trustworthy measure of how correct the map is, validated against Sentinel-2
+MNDWI.
 
-## Status
+## Key findings
 
-Step 9 of the execution plan: the 31 May 2025 event passes the signal gate, the analysis-ready stack is built, and four flood masks + kappa diagnostics are done. The 20 Apr 2026 event is retained as a documented negative result. Agreement confidence and validation are next.
+- **Binary flood map** (GMM ensemble, k ≥ 2): precision 82.7%, recall 80.2%,
+  **F1 0.814** (95% CI 0.801–0.826), IoU 0.68.
+- **H1 was first rejected, then refined.** With the original 4-method ensemble the
+  reliability curve was *non-monotonic* (High 77.1% < Medium 88.6%). Replacing the
+  weak adaptive member with **GMM** restores monotonicity — **High 88.4% > Medium
+  83.7% > Low 45.6%** — and the High/Medium confidence intervals don't overlap.
+- **Conclusion:** agreement predicts reliability only when ensemble members
+  genuinely measure the same signal (κ ≈ 0.8); an uncorrelated, low-recall member
+  (adaptive, κ ≈ 0.06) breaks it.
+- **Cross-terrain generalization:** global thresholds are terrain-specific (Otsu
+  farm −12.5 dB vs urban −2.9 dB), so a threshold tuned on one terrain does not
+  transfer to another.
 
-**Read `report/PROGRESS.md` first** — it is the step-by-step save point.
+Full results, every number, and the evidence trail live in `report/`.
 
-## Layout
+## Data
 
-```
-report/       PROGRESS.md (save point), living draft, work log, ADRs, claims ledger, references
-data/         raw and processed data (large files not committed)
-code/         config, preprocessing, flood masks, confidence, validation
-notebooks/    cell-by-cell views of the long pipeline scripts
-outputs/      generated maps, tables, figures
-app/          Streamlit demo
-```
+All data is public and auto-downloaded from the **Microsoft Planetary Computer**
+STAC API. Exact item IDs and SHA256 checksums are recorded in `data/manifest.json`.
 
-## Environment
-
-- Python venv at `.venv/` on `D:` (never install on `C:`)
-- Parameters live in `code/config/config.yaml`
-- Caches and TEMP/TMP on `D:` under `.cache/`
+> **The large raster files are gitignored** (raw ~260 MB + processed ~220 MB).
+> Anyone who clones this repo gets the code, notebooks, reports, figures and
+> tables — but must re-download the data to re-run the pipeline (see below).
+> The download is deterministic: the manifest pins the exact items.
 
 ## Reproduce
 
 ```powershell
+# 0. create venv and install (see requirements.lock.txt), then:
 .\.venv\Scripts\Activate.ps1
+
+# 1. resolve items + download data (~260 MB)
 python code\preprocessing\stac_manifest.py
 python code\preprocessing\fetch_subsets.py
-python code\preprocessing\check_coverage.py
+
+# 2. build the analysis stack (Lee filter -> dB, slope, static masks)
 python code\preprocessing\build_stack.py
+
+# 3. flood masks (4 core + Kittler/GMM alternatives)
 python code\flood_masks\run_masks.py
+python code\confidence\alternative_members.py
+
+# 4. confidence map + validation
+python code\confidence\agreement.py
+python code\confidence\validate.py
+
+# 5. sensitivity / ensemble-design / bootstrap
+python code\confidence\sensitivity_drop_adaptive.py
+python code\confidence\bootstrap_ci.py
+python code\confidence\validation_viz.py
+python code\confidence\cross_terrain.py
 ```
 
-Or run the matching notebooks in `notebooks/` cell by cell (see `notebooks/README.md`).
+Or run the matching notebooks in `notebooks/` cell-by-cell (`notebooks/README.md`)
+— notebooks `07`–`09` render figures inline.
+
+## Layout
+
+```
+report/       draft report, ADRs (decisions.md), claims_ledger.md, WORKLOG.md, references.bib
+data/         raw + processed data (large files NOT committed; manifest is committed)
+code/         config, preprocessing, flood_masks, confidence
+notebooks/    00-09, cell-by-cell views of the pipeline
+outputs/      generated tables (.csv), figures (.png); maps (.tif, regenerable)
+```
+
+## Environment
+
+- Python venv at `.venv/` (kept off `C:`; data caches under `.cache/` on `D:`)
+- All parameters in `code/config/config.yaml` (AOI, event, item IDs, thresholds)
+- No secrets are stored in the repo.
 
 ## Rules
 
-- No fabricated results: every number maps to a script output and a `report/claims_ledger.md` row.
-- Unverified facts are tagged `[To verify]`.
-- Engineering decisions are recorded in `report/decisions.md`.
+- **No fabricated results** — every number maps to a script output and a
+  `report/claims_ledger.md` row.
+- Engineering decisions are recorded in `report/decisions.md` (ADRs).
+- The `.py` files are the canonical pipeline; the notebooks mirror them.
