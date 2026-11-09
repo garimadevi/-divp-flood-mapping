@@ -15,6 +15,8 @@ map** (High / Medium / Low / Dry). It then tests whether "how many methods agree
 is a trustworthy measure of how correct the map is, validated against Sentinel-2
 MNDWI.
 
+**Full system architecture (diagrams + explanations):** see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## Key findings
 
 - **Binary flood map** (GMM ensemble, k ≥ 2): precision 82.7%, recall 80.2%,
