@@ -272,3 +272,37 @@ python code\confidence\bootstrap_ci.py         # CIs
 ```
 
 Deterministic: pinned item IDs, SHA256 checksums, and `seed = 42`.
+
+---
+
+## 12. FAQ
+
+**Q: Is there an ML model or a training dataset in the notebooks?**
+
+No. The project uses only **classical, unsupervised** image-processing methods — Otsu,
+Kittler–Illingworth, change detection, adaptive thresholding, and a Gaussian mixture.
+There is **no machine-learning model, no labeled training set, and no train/test split**.
+Every threshold is computed from the image's own histogram/statistics at run time.
+The Gaussian Mixture Model (GMM) is also **unsupervised** — it fits two Gaussians to the
+VV histogram via EM *on the same image it segments*, purely as a thresholding tool.
+The cross-terrain experiment (notebook `08`) transfers a *threshold value* across
+terrains; it does not train a model.
+
+**Q: What is the `return 0` / `sys.exit(main())` pattern at the bottom of each script?**
+
+```python
+def main() -> int:
+    ...       # does all the work
+    return 0  # 0 = success
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+- `return 0` — `main()` returns an integer **exit code**; `0` means success (Unix convention).
+- `sys.exit(main())` — runs `main()` and passes its return value as the process exit code.
+- `if __name__ == "__main__":` — runs the code only when the script is executed directly,
+  not when imported, which is why notebooks can `from common import ...` and reuse
+  functions without triggering the whole pipeline.
+- In the notebooks, the `return 0` line is removed (a top-level `return` is invalid in a
+  notebook cell) — the only difference between a `.py` script and its notebook mirror.
