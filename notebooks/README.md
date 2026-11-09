@@ -4,6 +4,20 @@ Each notebook is a **cell-by-cell view** of an existing script in `code/`.
 The scripts remain the canonical CLI and are not replaced. Notebooks exist so the
 work is visible and runnable step by step.
 
+## How notebooks and scripts interlink
+
+- **The `.py` file is the engine** — the single source of truth for the logic,
+  written first, importable, reproducible, and what the claims ledger points to.
+- **The `.ipynb` is the mirror** — it runs the **same code**, just split into
+  markdown + code cells, with `%matplotlib inline` so figures appear in the notebook.
+- **They share helpers** — both import `code/preprocessing/common.py` and read
+  `code/config/config.yaml`, so there is no duplicated logic.
+- **Only three differences**: notebooks drop the `return 0` line, add
+  `%matplotlib inline` + `plt.show()`, and start with a setup cell for `sys.path`.
+
+> Full explanation and diagram: **`ARCHITECTURE.md` §13**.
+> Rule: change the `.py` first, then mirror it into the notebook.
+
 > **Event (ADR-20):** the pipeline targets the Brahmaputra riverine flood of 23 June 2023
 > over the widened AOI `[91.55, 26.00, 91.95, 26.30]`. Notebook `01` is a historical
 > record of the (superseded) urban gate; the other notebooks read the current event from
