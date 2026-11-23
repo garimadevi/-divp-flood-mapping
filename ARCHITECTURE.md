@@ -145,6 +145,11 @@ scripts. See README "Reproduce".
 
 Outputs → `data/processed/`: `s1_{pre,post}_{vv,vh}_db.tif`, `slope_deg.tif`, masks.
 
+**Measured effect of the filter** (`lee_effect.py`, `lee_effect.csv`): at the same
+Otsu threshold (−12.5534 dB) the unfiltered scene gives 231.4 km² below threshold vs
+208.5 km² filtered — 23.9 km² (10.3%) of that is speckle-induced false water, while
+only 1.08 km² of thin water is lost. Open-water σ in the 3 km demo crop: 1.87 → 1.36 dB.
+
 ---
 
 ## 5. Segmentation — six methods
@@ -248,7 +253,7 @@ code/
   flood_masks/    run_masks.py
   confidence/     agreement.py · validate.py · alternative_members.py
                   sensitivity_drop_adaptive.py · bootstrap_ci.py
-                  validation_viz.py · cross_terrain.py
+                  validation_viz.py · cross_terrain.py · lee_effect.py
 notebooks/        00_data_acquisition … 09_bootstrap_ci
 report/           DRAFT_REPORT.md · decisions.md · claims_ledger.md
                   WORKLOG.md · PROGRESS.md · references/references.bib

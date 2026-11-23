@@ -70,6 +70,9 @@ python code\confidence\sensitivity_drop_adaptive.py
 python code\confidence\bootstrap_ci.py
 python code\confidence\validation_viz.py
 python code\confidence\cross_terrain.py
+
+# 6. preprocessing effect (supports the MATLAB cross-check)
+python code\confidence\lee_effect.py
 ```
 
 Or run the matching notebooks in `notebooks/` cell-by-cell (`notebooks/README.md`)

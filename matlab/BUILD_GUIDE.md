@@ -67,6 +67,12 @@ These come from the Python run and are your acceptance tests.
 Evidence: `matlab/step1_read_filter.m`, `matlab/out/hist_post_vv.png`,
 `matlab/out/lee_before_after.png`.
 
+**Why the filter matters (quote this).** From `code/confidence/lee_effect.py`
+(`outputs/tables/lee_effect.csv`): at the *same* threshold, the unfiltered scene
+gives 231.4 km² below threshold vs 208.5 km² filtered — **23.9 km² (10.3 %) is
+speckle-induced false water**, while smoothing costs only **1.08 km²** of thin
+water. That is a ~20:1 trade, and it is the quantified answer to "why preprocess?".
+
 ### Mask areas (soft check, ±0.5 %)
 
 | Mask | km² |

@@ -98,6 +98,8 @@ Verified against the live Planetary Computer STAC API on 2026-11-07 (riverine pi
 
 **M1 preprocessing.** The RTC pair is read on the common 10 m grid. A 7x7 Lee filter is applied to linear power with 4 looks, then converted to dB (`10*log10`). Slope is derived from the Copernicus DEM. Permanent water is JRC occurrence ≥ 50%; urban is ESA WorldCover class 50; vegetation is classes 10–40. All products share the `EPSG:32646` grid.
 
+Filtering is not cosmetic, and the effect is measurable. At the same Otsu threshold (−12.5534 dB) the unfiltered scene falls below threshold over 231.4 km², versus 208.5 km² after Lee filtering: **23.9 km² (10.3%) of that area is speckle-induced false water**, while smoothing costs only 1.08 km² of thin water (pixel agreement 98.2%). In the 3 km × 3 km demo crop over the Brahmaputra channel (91.70–91.73 °E, 26.17–26.19 °N) open-water backscatter variability falls from 1.87 to 1.36 dB (σ). Evidence: `outputs/tables/lee_effect.csv`, `outputs/figures/lee_effect.png`, `code/confidence/lee_effect.py`. The same stage is re-implemented natively in MATLAB (`matlab/step1_read_filter.m`), which reproduces the Python filter to 2.2 × 10⁻⁵ dB — a tool-independence check on the preprocessing.
+
 **M2 flood-mask ensemble.** Four core methods are applied, plus two alternative thresholding methods evaluated for the ensemble:
 1. Global Otsu on post-event VV (threshold −12.55 dB).
 2. Global Otsu on post-event VH (threshold −17.31 dB).
@@ -179,6 +181,7 @@ These cases demonstrate the central sensitivity of C-band flood mapping to event
 5. **Pre/post spacing.** The SAR pair is 12 days apart (11 and 23 June); the change-detection method therefore reflects net change over a long window, not the event alone.
 6. **Classical methods only.** No deep-learning or polarimetric methods were used; the adaptive method's weakness is a documented limitation of simple local statistics in heterogeneous terrain.
 7. **No depth or hydrology.** The maps are extents, not depths, and no hydraulic model was applied.
+8. **Lee noise model.** The filter assumes 4 looks, but open-water variability (σ ≈ 1.9 dB) suggests the RTC product is already multilooked, so the filter smooths slightly more than is statistically optimal. The measured cost is 1.08 km² of thin water (`outputs/tables/lee_effect.csv`); estimating the equivalent number of looks from the data would be more principled.
 
 ---
 

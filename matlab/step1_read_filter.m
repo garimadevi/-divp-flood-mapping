@@ -48,16 +48,31 @@ d = abs(Idb - I); d = d(isfinite(d));
 fprintf('Lee rebuild vs processed file: max %.6f dB | P99 %.6f dB\n', max(d), prctile(d,99));
 
 %% Section E — what the filter actually did (the demo figure)
-r0 = 1200; c0 = 1500; n = 300;
-figure('Color','w','Position',[80 80 940 500]);
+r0 = 1200; c0 = 1500; n = 300;            % 300 px = 3.00 km at 10 m
+figure('Color','w','Position',[80 80 940 520]);
+
 subplot(1,2,1)
 imagesc(Idb(r0:r0+n-1, c0:c0+n-1)); axis image off
 colormap(gray); caxis([-22 -2]); title('Lee 7\times7, 4 looks');
-set(gca,'Position',[0.05 0.08 0.42 0.84]);   % square box -> no white margins
+set(gca,'Position',[0.05 0.06 0.42 0.80]);      % square box -> no white margins
+hold on
+text(15, 180, 'Brahmaputra channel (water)', 'Color','w', 'FontSize',10, 'FontWeight','bold');
+text(15,  30, 'vegetated bank',              'Color','k', 'FontSize',10, 'FontWeight','bold');
+plot([15 115], [288 288], 'k-', 'LineWidth', 3); % 100 px = 1 km scale bar
+text(15, 272, '1 km', 'Color','k', 'FontSize',10, 'FontWeight','bold');
+hold off
+
 subplot(1,2,2)
 imagesc(10*log10(Lraw(r0:r0+n-1, c0:c0+n-1))); axis image off
 colormap(gray); caxis([-22 -2]); title('raw \rightarrow dB (speckle)');
-set(gca,'Position',[0.53 0.08 0.42 0.84]);
+set(gca,'Position',[0.53 0.06 0.42 0.80]);
+hold on
+plot([15 115], [288 288], 'k-', 'LineWidth', 3);
+text(15, 272, '1 km', 'Color','k', 'FontSize',10, 'FontWeight','bold');
+hold off
+
+sgtitle(['Same 90,000 pixels (3\times3 km), 23 Jun 2023, ', ...
+         'lon 91.70-91.73 E - only the filter differs'], 'FontSize',12);
 saveas(gcf, fullfile(P.out,'lee_before_after.png'));
 
 %% Section F — self-check (the two numbers a viva will ask for)
