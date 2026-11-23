@@ -19,7 +19,7 @@ MNDWI.
 
 ## Key findings
 
-- **Binary flood map** (GMM ensemble, k ≥ 2): precision 82.7%, recall 80.2%,
+- **Binary flood map** (GMM ensemble, k ≥ 2): precision 82.6%, recall 80.2%,
   **F1 0.814** (95% CI 0.801–0.826), IoU 0.68.
 - **H1 was first rejected, then refined.** With the original 4-method ensemble the
   reliability curve was *non-monotonic* (High 77.1% < Medium 88.6%). Replacing the

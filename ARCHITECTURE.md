@@ -200,7 +200,7 @@ flowchart LR
 | Metric | Value |
 |---|---|
 | Flood F1 | **0.8139** [95% CI 0.801–0.826] |
-| Precision / Recall | 82.7% / 80.2% |
+| Precision / Recall | 82.6% / 80.2% |
 | Reliability | Dry 4.1% · Low 45.5% · Medium 83.7% · **High 88.4%** (monotonic ✓) |
 
 ---
