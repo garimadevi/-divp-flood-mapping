@@ -25,3 +25,6 @@ Thumbs.db
 # Report build artefacts
 report/*.pdf
 report/*.docx
+
+# MATLAB scratch intermediates (figures are committed, .mat are not)
+matlab/out/*.mat
