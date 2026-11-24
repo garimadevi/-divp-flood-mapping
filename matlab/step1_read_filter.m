@@ -2,7 +2,7 @@
 if ~exist('P','var'), setup_paths; end
 
 f = fullfile(P.processed,'s1_post_vv_db.tif');
-[I, R] = readgeoraster(f,'OutputType','double');
+[I,R] = readgeoraster(f,'OutputType','double');
 I(I == -9999) = NaN;          % TRAP 1: nodata before ANY statistic
 valid = ~isnan(I);
 x = I(valid);
@@ -88,104 +88,3 @@ else
     fprintf('FAIL  Lee filter diverges from build_stack.py (max |diff| %.6f dB)\n', max(d));
 end
 
-%% Implementing the terrain and landcover masks for flood analysis
-%% Section A — reference grid: every mask is built on the S1 pixel grid
-if ~exist('P','var'), setup_paths; end
-
-f = fullfile(P.processed,'s1_post_vv_db.tif');
-[I, R] = readgeoraster(f,'OutputType','double');
-I(I == -9999) = NaN;          % TRAP 1: nodata before ANY statistic
-valid = ~isnan(I);
-[nr, nc] = size(I);
-
-% latitude / longitude of every S1 pixel (used to sample the other layers)
-[col, row] = meshgrid(1:nc, 1:nr);
-if isa(R,'map.rasterref.GeographicCellsReference')
-    [lat, lon] = intrinsicToGeographic(R, col, row);
-else                                             % projected grid (UTM)
-    [x, y] = intrinsicToWorld(R, col, row);
-    [lat, lon] = projinv(R.ProjectedCRS, x, y);
-end
-
-% the three rules of this step
-SLOPE_MAX = 10;               % degrees, steeper = excluded
-JRC_MIN   = 90;               % % occurrence, at or above = permanent water
-fprintf('S1 grid : %d x %d | valid %.2f %%\n', nr, nc, 100*mean(valid(:)));
-
-%% Section B — DEM -> slope
-[Z, Rz] = readgeoraster(fullfile(P.raw,'dem','dem.tif'),'OutputType','double');
-Z(Z < -1000) = NaN;                              % DEM nodata
-
-% TRAP 2: the DEM pixel size is in DEGREES, slope needs METRES
-lat0 = mean(lat(:));
-dy = deg2rad(Rz.CellExtentInLatitude)  * 6371000;
-dx = deg2rad(Rz.CellExtentInLongitude) * 6371000 * cosd(lat0);
-
-[gx, gy] = gradient(Z, dx, dy);                  % rise per metre
-slope = atand(sqrt(gx.^2 + gy.^2));              % degrees
-
-% move the slope onto the S1 grid
-slope = geointerp(slope, Rz, lat, lon, 'linear');
-steep = slope > SLOPE_MAX;                       % NaN -> false (kept)
-
-%% Section C — JRC permanent water
-[occ, Rj] = readgeoraster(fullfile(P.raw,'jrc','gsw_occurrence.tif'),'OutputType','double');
-occ(occ == 255) = NaN;                           % JRC nodata
-occ = geointerp(occ, Rj, lat, lon, 'nearest');
-perm_water = occ >= JRC_MIN;                     % NaN -> false
-
-%% Section D — ESA WorldCover: urban and vegetation
-[wc, Rw] = readgeoraster(fullfile(P.raw,'worldcover','worldcover.tif'),'OutputType','double');
-wc = geointerp(wc, Rw, lat, lon, 'nearest');     % TRAP 3: classes -> nearest, never linear
-
-urban = (wc == 50);                              % built-up
-veg   = ismember(wc, [10 20 30]);                % tree, shrub, grass
-
-%% Section E — combine: what the flood analysis may use
-exclude  = perm_water | steep;
-analysis = valid & ~exclude;                     % 1 = pixel enters flood analysis
-
-p = @(m) 100*nnz(m & valid)/nnz(valid);
-fprintf('permanent water : %5.2f %%\n', p(perm_water));
-fprintf('slope > %d deg  : %5.2f %%\n', SLOPE_MAX, p(steep));
-fprintf('analysis domain : %5.2f %%\n', p(analysis));
-fprintf('urban %.2f %% | vegetation %.2f %%\n', p(urban), p(veg));
-
-geotiffwrite(fullfile(P.processed,'mask_analysis.tif'), uint8(analysis), R, ...
-    'GeoKeyDirectoryTag', geotiffinfo(f).GeoTIFFTags.GeoKeyDirectoryTag);
-save(fullfile(P.processed,'masks.mat'), 'perm_water','steep','urban','veg','analysis','slope');
-
-%% Section F — the figure
-figure('Color','w','Position',[80 80 940 760]);
-subplot(2,2,1); imagesc(slope);      axis image off; colorbar; caxis([0 30]);
-title('Slope (deg)');
-subplot(2,2,2); imagesc(perm_water); axis image off; colormap(gca, gray(2));
-title('JRC permanent water');
-subplot(2,2,3); imagesc(urban + 2*veg); axis image off; colormap(gca, parula(3));
-title('WorldCover: 1 urban, 2 vegetation');
-subplot(2,2,4); imagesc(analysis);   axis image off; colormap(gca, gray(2));
-title('Analysis domain (white = used)');
-saveas(gcf, fullfile(P.out,'masks_overview.png'));
-
-%% Section G — self-check
-fprintf('\n--- step2 verification ---\n');
-if isequal(size(slope), size(I)) && isequal(size(perm_water), size(I)) && isequal(size(wc), size(I))
-    fprintf('PASS  all layers have the S1 grid size\n');
-else
-    fprintf('FAIL  a layer does not match the S1 grid size\n');
-end
-s = slope(isfinite(slope));
-if all(s >= 0 & s <= 90)
-    fprintf('PASS  slope is within 0-90 deg (max %.1f)\n', max(s));
-else
-    fprintf('FAIL  slope has values outside 0-90 deg\n');
-end
-
-% same Otsu as Step 1: how many "water-looking" pixels do the masks remove?
-x = I(valid); lo = min(x); hi = max(x);
-t = lo + graythresh((x - lo)/(hi - lo))*(hi - lo);
-dark = valid & (I < t);
-fprintf('dark pixels (VV < %.2f dB): %d\n', t, nnz(dark));
-fprintf('  removed as permanent water : %5.1f %%\n', 100*nnz(dark & perm_water)/nnz(dark));
-fprintf('  removed as steep terrain   : %5.1f %%\n', 100*nnz(dark & steep & ~perm_water)/nnz(dark));
-fprintf('  left as flood candidates   : %5.1f %%\n', 100*nnz(dark & analysis)/nnz(dark));
