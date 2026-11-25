@@ -218,6 +218,8 @@ flowchart LR
 | `alternative_members.py` | Kittler/GMM as 4th member + **leave-one-out ablation** |
 | `bootstrap_ci.py` | 500 m spatial block bootstrap, 1000 reps, 95% CIs |
 | `cross_terrain.py` | fit threshold on farmland vs urban, transfer, measure F1 drop |
+| `ensemble_area.py` | k ≥ 2 area of each 4-member ensemble (adaptive vs adopted GMM) |
+| `lee_effect.py` | speckle filter effects: 23.9 km² false water removed, 1.08 km² lost |
 
 Key findings:
 - Original 4-method ensemble was **non-monotonic** (High 77.1% < Medium 88.6%) —
@@ -254,6 +256,7 @@ code/
   confidence/     agreement.py · validate.py · alternative_members.py
                   sensitivity_drop_adaptive.py · bootstrap_ci.py
                   validation_viz.py · cross_terrain.py · lee_effect.py
+                  ensemble_area.py
 notebooks/        00_data_acquisition … 09_bootstrap_ci
 report/           DRAFT_REPORT.md · decisions.md · claims_ledger.md
                   WORKLOG.md · PROGRESS.md · references/references.bib

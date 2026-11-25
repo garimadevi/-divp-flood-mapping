@@ -1,0 +1,3 @@
+ensemble,members,n_members,k_ge2_px,k_ge2_km2,k_ge3_px,k_ge3_km2,k_ge4_px,k_ge4_km2
+adaptive_4th,otsu_vv+otsu_vh+change_vv+adaptive_vv,4,1229331,122.933,887688,88.769,39063,3.906
+gmm_4th,otsu_vv+otsu_vh+change_vv+gmm,4,1368281,136.828,1214303,121.430,876248,87.625

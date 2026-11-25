@@ -73,21 +73,53 @@ gives 231.4 km² below threshold vs 208.5 km² filtered — **23.9 km² (10.3 %)
 speckle-induced false water**, while smoothing costs only **1.08 km²** of thin
 water. That is a ~20:1 trade, and it is the quantified answer to "why preprocess?".
 
-### Mask areas (soft check, ±0.5 %)
+### Mask areas (soft check, ±0.5 %) — verified 25 Nov
 
-| Mask | km² |
-|---|---|
-| Otsu VV | 111.75 |
-| Otsu VH | 143.02 |
-| Change VV | 108.17 |
-| Adaptive VV | 5.63 |
-| Kittler | 97.78 |
-| GMM | 145.87 |
+| Mask | Python km² | MATLAB km² (own threshold) | MATLAB km² (Python's threshold) |
+|---|---|---|---|
+| Otsu VV | 111.75 | 111.23 | **111.75** ✅ |
+| Otsu VH | 143.02 | 142.12 | **143.02** ✅ |
+| Change VV | 108.17 | 108.17 | **108.17** ✅ pixel-identical |
+| Adaptive VV | 5.63 | 5.62 | 5.62 (Δ 0.29 %) |
+| Kittler | 97.78 | 97.78 | **97.78** ✅ (4 px differ) |
+| GMM | 145.87 | 145.68 | **145.87** ✅ |
+
+**Read the middle column correctly — this is a likely examiner question.**
+MATLAB's own thresholds differ from Python's by a quarter histogram bin (0.05 dB),
+so the middle column is *expected* to be slightly smaller: water is "below
+threshold", so a darker cut shrinks the map. The right-hand column feeds each mask
+Python's own threshold and therefore tests only the mask logic. Five of six then
+match to 0.0 %, `change_vv` is **pixel-identical**, and Kittler differs on 4 pixels
+out of 977,747. The residual on `adaptive` (0.29 %) is float32-vs-double
+accumulation in a 51×51 local mean, amplified by a 0.004 dB shift in the median
+local threshold.
+
+Quote the right-hand column when asked "does MATLAB really reproduce Python?" —
+quoting the middle column understates it.
 
 > Areas from `candidate_members.csv` are ~0.3 % smaller than `mask_stats.csv` for the
 > same mask — the two Python scripts use slightly different valid-pixel bases. Use
 > `mask_stats.csv` for the four core masks and `candidate_members.csv` for
 > Kittler/GMM, and don't chase a 0.3 % difference.
+
+### Binary flood-map area (k ≥ 2)
+
+| Ensemble | k ≥ 2 | k ≥ 3 | k ≥ 4 |
+|---|---|---|---|
+| adaptive as 4th (original) | 122.93 km² | 88.77 | 3.91 |
+| **GMM as 4th (adopted)** | **136.83 km²** | 121.43 | 87.63 |
+
+Source: `outputs/tables/ensemble_area.csv` (`code/confidence/ensemble_area.py`),
+computed from the same mask rasters the report uses. Two numbers are in circulation
+and both are correct:
+
+- **122.59 km²** — `confidence_classes.csv`, i.e. `agreement.py`'s own masks
+  (low + medium + high). This is the *adaptive* ensemble.
+- **122.93 km²** — the same ensemble rebuilt from `outputs/maps/masks/*.tif`
+  (the 0.3 % base difference above).
+
+The **adopted** GMM ensemble's binary map is **136.83 km²**; MATLAB reproduces it at
+136.42 km² (Δ 0.30 %), the same threshold-offset effect as the masks.
 
 ### Final ensemble (adopted: Otsu VV + Otsu VH + change + GMM, flood = k ≥ 2)
 
@@ -118,24 +150,32 @@ flowchart LR
     T["data/processed/*_db.tif<br/>(read-only, already Lee-filtered)"]
     T --> A["step1_read_filter.m<br/>Garima"]
     T --> B["step2_thresholds.m<br/>Garima"]
-    T --> C["step3_masks.m<br/>Pritom"]
+    T --> C["step3_masks.m<br/>Garima"]
+    T --> H["check_terrain.m<br/>Pritom"]
     A -->|"out/hist_post_vv.png<br/>out/lee_before_after.png"| B
     B -->|"out/thresholds.csv"| C
-    C -->|"out/masks.mat<br/>out/mask_areas.csv"| D["step4_confidence.m<br/>Pritom"]
-    D -->|"out/confidence.mat"| E["step5_validate.m<br/>Pritom"]
-    E -->|"out/metrics_matlab.csv"| F["step6_verify.m<br/>Garima"]
-    G["outputs/tables/*.csv<br/>(Python reference)"] --> F
+    C -->|"out/masks.mat<br/>out/mask_areas.csv"| D["step3_comparing_algorithms.m<br/>Pritom"]
+    C -->|"out/masks.mat"| E["step4_confidence.m<br/>not built yet"]
+    E -->|"out/confidence.mat"| F["step5_validate.m<br/>not built yet"]
+    G["outputs/tables/*.csv<br/>(Python reference)"] --> D
+    G --> F
 ```
 
-| File | Owner | Reads | Writes |
-|---|---|---|---|
-| `setup_paths.m` | **Garima** | — | the struct `P` (all paths) |
-| `step1_read_filter.m` | **Garima** | `data/processed/s1_post_vv_db.tif` (already filtered!), `data/raw/sentinel1/s1_rtc_post_vv.tif` (linear power) | `out/hist_post_vv.png`, `out/lee_before_after.png` — **no `.mat`** |
-| `step2_thresholds.m` | **Garima** | the `*_db.tif` files directly | `out/thresholds.csv` |
-| `step3_masks.m` | **Pritom** | the `*_db.tif` files, `slope_deg.tif`, `masks/permanent_water.tif`, `out/thresholds.csv` | `out/masks.mat`, `out/mask_areas.csv`, `out/masks_overview_matlab.png` |
-| `step4_confidence.m` | **Pritom** | `out/masks.mat` | `out/confidence.mat`, `out/confidence_map.png` |
-| `step5_validate.m` | **Pritom** | `out/confidence.mat`, `data/raw/sentinel2/s2_post_*.tif` | `out/metrics_matlab.csv`, `out/reliability_matlab.png`, `out/confusion_map.png` |
-| `step6_verify.m` | **Garima** | `out/*.csv` + `outputs/tables/*.csv` | console PASS/FAIL table (screenshot it) |
+| File | Owner | Reads | Writes | Status |
+|---|---|---|---|---|
+| `setup_paths.m` | **Garima** | — | the struct `P` (all paths) | ✅ |
+| `step1_read_filter.m` | **Garima** | `data/processed/s1_post_vv_db.tif` (already filtered!), `data/raw/sentinel1/s1_rtc_post_vv.tif` (linear power) | `out/hist_post_vv.png`, `out/lee_before_after.png` — **no `.mat`** | ✅ |
+| `step2_thresholds.m` | **Garima** | the `*_db.tif` files directly | `out/thresholds.csv` | ✅ 5/5 PASS |
+| `step3_masks.m` | **Garima** (built 25 Nov from Pritom's terrain block) | `*_db.tif`, `slope_deg.tif`, `masks/permanent_water.tif`, `out/thresholds.csv` | `out/masks.mat`, `out/mask_areas.csv`, `out/masks_overview_matlab.png` | ✅ 6/6 PASS |
+| `step3_comparing_algorithms.m` | **Pritom** | `out/masks.mat`, `outputs/tables/mask_kappa.csv`, `ensemble_area.csv` | `out/kappa_*.png`, `out/kappa_*.csv` | ✅ 5/5 PASS |
+| `check_terrain.m` | **Pritom** | raw DEM / JRC / WorldCover + the canonical layers | `out/terrain_check.csv`, `out/terrain_check.png` | ✅ cross-check only |
+| `step4_confidence.m` | **Pritom** | `out/masks.mat` | `out/confidence.mat`, `out/confidence_map.png` | **next** |
+| `step5_validate.m` | **Pritom** | `out/confidence.mat`, `data/raw/sentinel2/s2_post_*.tif` | `out/metrics_matlab.csv`, `out/reliability_matlab.png`, `out/confusion_map.png` | **next** |
+| `step6_verify.m` | **Garima** | `out/*.csv` + `outputs/tables/*.csv` | console PASS/FAIL table (screenshot it) | **next** |
+
+**Order matters:** `step3_masks` → `step3_comparing_algorithms` (the kappa script
+consumes `masks.mat`; it does not rebuild the masks). `check_terrain` is a
+verification utility with no place in the pipeline — run it any time.
 
 **Naming note:** MATLAB script names must start with a **letter** — `01_read.m` is
 invalid and can only be run via `run('01_read.m')`. Hence `step1_…`, `step2_…`.
@@ -205,7 +245,6 @@ Same scene, two stages of the chain — that is why re-filtering stage 3 is a mi
 P.root      = 'D:\DIVP PROJECT';
 P.processed = fullfile(P.root,'data','processed');
 P.raw       = fullfile(P.root,'data','raw');
-P.masks     = fullfile(P.root,'outputs','maps','masks');   % Python masks, read-only
 P.tables    = fullfile(P.root,'outputs','tables');         % Python tables, read-only
 P.out       = fullfile(P.root,'matlab','out');
 if ~exist(P.out,'dir'), mkdir(P.out); end
@@ -295,14 +334,50 @@ Use `x(1:8:end)` (MATLAB is 1-based), not `x(::8)`.
 at once (`clear` aggressively); you have 14 GB, so it's fine if you don't
 accidentally make `double` copies of everything in a loop.
 
+**Trap 9 — `imopen`/`imclose` do not erode the image border, SciPy does.**
+MATLAB's binary erosion pads with the maximum (1), so a strip of water along the
+edge survives. SciPy's `binary_opening` uses `border_value=0`. On this scene that
+was a **+0.2 % area bias on every mask** — invisible in a gate at ±0.5 %, but it
+made `change_vv` differ from Python even though its threshold is *identical*, which
+is exactly the kind of thing an examiner asks about. Zero-pad before eroding:
+
+```matlab
+function m = erode0(m, se)
+pr = (size(se.Neighborhood,1)-1)/2;  pc = (size(se.Neighborhood,2)-1)/2;
+[nr, nc] = size(m);
+mp = false(nr+2*pr, nc+2*pc);
+mp(pr+1:pr+nr, pc+1:pc+nc) = m;
+mp = imerode(mp, se);
+m  = mp(pr+1:pr+nr, pc+1:pc+nc);
+end
+```
+
+After this fix `change_vv` matches Python on **0 of 1,081,731 pixels differing**.
+
+**Trap 10 — the adaptive member has no single threshold.** Its threshold is a
+*field* (`local_mean − 1.5·local_std`, window 51), so it cannot live in
+`thresholds.csv`. It is computed inside `step3_masks.m` where the local mean and
+std already exist, and only its **median** (−9.5686 dB) is quoted. Any script that
+rebuilds the adaptive mask with different parameters (e.g. `adaptthresh` with
+window 151, sensitivity 0.5, plus a global guard) is measuring a *different
+method*, and its kappa will not be comparable with `mask_kappa.csv`.
+
+**Trap 11 — kappa depends on the pixel set, not just the masks.** `run_masks.py`
+computes kappa over `base` (radar-valid, not permanent water), which includes the
+steep pixels where every mask is 0 by construction. Computing over `domain`
+instead inflates kappa by removing those easy agreements. Use `base` if you want
+to reproduce `mask_kappa.csv`; state which set you used whenever you quote a kappa.
+
 ---
 
 ## 8. Definition of done (tick before the viva)
 
 - [x] `step1`: **done 23 Nov** — bimodal histogram; Otsu VV −12.6046 dB (Δ 0.051 from Python); Lee rebuild max |diff| 0.000022 dB
-- [ ] `step2`: all six thresholds within ±0.25 dB of §2
-- [ ] `step3`: six mask areas within ±0.5 %; morphology removes the specks
-- [ ] `step4`: class areas 3.905 / 84.765 / 33.925 km²; flood map = k ≥ 2
+- [x] `step2`: **done 24 Nov** — five scalar thresholds, 5/5 within ±0.25 dB; Kittler **exact** (−14.0180), GMM Δ 0.0078 dB
+- [x] `step3`: **done 25 Nov** — six masks, 6/6 PASS; at Python's thresholds five match to 0.0 %, `change_vv` pixel-identical, Kittler 4 px; adaptive median −9.5725 dB (Δ 0.004)
+- [x] `check_terrain` (Pritom): **done 25 Nov** — slope correlation 1.0000, permanent water 0.00 % disagreement, domain 727.10 vs 727.36 km²
+- [x] `step3_comparing_algorithms` (Pritom): **done 25 Nov** — six pairwise kappas vs `mask_kappa.csv` all within 0.0015; ADR-23 k ≥ 2 = 136.42 km² vs Python 136.83
+- [ ] `step4`: class areas 3.905 / 84.765 / 33.925 km²; flood map = k ≥ 2 (**next**)
 - [ ] `step5`: precision 0.8264, recall 0.8016, F1 0.8138; curve Dry < Low < Med < High
 - [ ] `step6`: PASS/FAIL table prints all-green (screenshot for a slide)
 - [ ] Both of you can explain the 30-second main finding without notes

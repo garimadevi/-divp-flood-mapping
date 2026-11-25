@@ -73,6 +73,7 @@ python code\confidence\cross_terrain.py
 
 # 6. preprocessing effect (supports the MATLAB cross-check)
 python code\confidence\lee_effect.py
+python code\confidence\ensemble_area.py
 ```
 
 Or run the matching notebooks in `notebooks/` cell-by-cell (`notebooks/README.md`)

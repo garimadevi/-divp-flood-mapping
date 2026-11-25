@@ -1,0 +1,7 @@
+a,b,kappa_matlab,kappa_python,diff
+otsu_vv,otsu_vh,0.8501,0.8492,+0.0009
+otsu_vv,change_vv,0.7885,0.7900,-0.0015
+otsu_vv,adaptive_vv,0.0751,0.0753,-0.0002
+otsu_vh,change_vv,0.7653,0.7645,+0.0008
+otsu_vh,adaptive_vv,0.0620,0.0621,-0.0001
+change_vv,adaptive_vv,0.0662,0.0662,-0.0000
