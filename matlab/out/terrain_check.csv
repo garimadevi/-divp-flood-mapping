@@ -1,0 +1,8 @@
+quantity,this_script,canonical_python,diff
+slope_median_abs_diff_deg,0.0000,0,0.0000
+slope_p99_abs_diff_deg,0.0000,0,0.0000
+slope_correlation,1.0000,1,0.0000
+permanent_water_km2,91.570,91.634,-0.064
+urban_km2,124.889,124.895,-0.006
+vegetation_km2,1085.712,1086.268,-0.556
+analysis_domain_km2,727.098,727.355,-0.257

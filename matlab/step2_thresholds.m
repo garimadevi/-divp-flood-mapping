@@ -1,171 +1,20 @@
-%% step2_masks_and_thresholds.m - terrain / land-cover masks, then the five thresholds
-% PART 1  masks  : DEM slope, JRC permanent water, ESA WorldCover (urban, vegetation)
-% PART 2  thresholds : Otsu VV, Otsu VH, change, Kittler, GMM (ADR-23 ensemble)
-% Outputs: processed/mask_analysis.tif, processed/masks.mat,
-%          out/masks_overview.png, out/thresholds.csv
+%% step2_thresholds.m - the five scalar thresholds (ADR-23 ensemble)
+% Mirrors code/confidence/alternative_members.py (kittler_threshold, gmm_threshold).
+% Output: matlab/out/thresholds.csv
 if ~exist('P','var'), setup_paths; end
 
-%% ====================== PART 1 - TERRAIN & LAND-COVER MASKS ======================
-
-%% Section A - reference grid: every mask is built on the S1 pixel grid
-f_dem = fullfile(P.raw,'dem','dem.tif');
-f_jrc = fullfile(P.raw,'jrc','gsw_occurrence.tif');
-f_wc  = fullfile(P.raw,'worldcover','worldcover.tif');
-
-% FIX 1: fail early, with the file name, instead of crashing half way through
-need = {f_dem, f_jrc, f_wc, ...
-        fullfile(P.processed,'s1_post_vv_db.tif'), ...
-        fullfile(P.processed,'s1_post_vh_db.tif'), ...
-        fullfile(P.tables,'mask_stats.csv'), ...
-        fullfile(P.tables,'candidate_members.csv')};
-for k = 1:numel(need)
-    if ~isfile(need{k}), error('Missing input file: %s', need{k}); end
-end
-
-f = fullfile(P.processed,'s1_post_vv_db.tif');
-[I, R] = readgeoraster(f,'OutputType','double');
-I(I == -9999) = NaN;          % TRAP 1: nodata before ANY statistic
-valid = ~isnan(I);
-[nr, nc] = size(I);
-
-% latitude / longitude of every S1 pixel (used to sample the other layers)
-[col, row] = meshgrid(1:nc, 1:nr);
-if isa(R,'map.rasterref.GeographicCellsReference')
-    [lat, lon] = intrinsicToGeographic(R, col, row);
-else                                             % projected grid (UTM)
-    [xw, yw] = intrinsicToWorld(R, col, row);
-    [lat, lon] = projinv(R.ProjectedCRS, xw, yw);
-end
-clear col row xw yw
-
-% the two exclusion rules
-SLOPE_MAX = 10;               % degrees, steeper = excluded
-JRC_MIN   = 90;               % % occurrence, at or above = permanent water
-fprintf('S1 grid : %d x %d | valid %.2f %%\n', nr, nc, 100*mean(valid(:)));
-
-%% Section B - DEM -> slope
-[Z, Rz] = readgeoraster(f_dem,'OutputType','double');
-Z(Z < -1000) = NaN;                              % DEM nodata
-
-% TRAP 2: the pixel size must be in METRES (a lat/lon DEM is in DEGREES)
-% FIX 2: also works when the DEM is already projected (metres)
-if isa(Rz,'map.rasterref.GeographicCellsReference')
-    lat0 = mean(lat(:));
-    dy = deg2rad(Rz.CellExtentInLatitude)  * 6371000;
-    dx = deg2rad(Rz.CellExtentInLongitude) * 6371000 * cosd(lat0);
-else
-    dx = Rz.CellExtentInWorldX;
-    dy = Rz.CellExtentInWorldY;
-end
-
-[gx, gy] = gradient(Z, dx, dy);                  % rise per metre
-S = atand(sqrt(gx.^2 + gy.^2));                  % degrees, on the DEM grid
-
-% FIX 3: sample_on_grid works for lat/lon AND projected source rasters
-slope = sample_on_grid(S, Rz, lat, lon, 'linear');   % move onto the S1 grid
-steep = slope > SLOPE_MAX;                       % NaN -> false (kept)
-clear Z gx gy S
-
-%% Section C - JRC permanent water
-[occ, Rj] = readgeoraster(f_jrc,'OutputType','double');
-occ(occ == 255) = NaN;                           % JRC nodata
-occ = sample_on_grid(occ, Rj, lat, lon, 'nearest');
-perm_water = occ >= JRC_MIN;                     % NaN -> false
-
-%% Section D - ESA WorldCover: urban and vegetation
-[wc, Rw] = readgeoraster(f_wc,'OutputType','double');
-wc(wc == 0) = NaN;                               % WorldCover nodata
-wc = sample_on_grid(wc, Rw, lat, lon, 'nearest');    % TRAP 3: classes -> nearest, never linear
-
-urban = (wc == 50);                              % built-up
-veg   = ismember(wc, [10 20 30]);                % tree, shrub, grass
-clear lat lon
-
-%% Section E - combine: what the flood analysis may use
-exclude  = perm_water | steep;
-analysis = valid & ~exclude;                     % 1 = pixel enters flood analysis
-
-p = @(m) 100*nnz(m & valid)/nnz(valid);
-fprintf('permanent water : %5.2f %%\n', p(perm_water));
-fprintf('slope > %d deg  : %5.2f %%\n', SLOPE_MAX, p(steep));
-fprintf('analysis domain : %5.2f %%\n', p(analysis));
-fprintf('urban %.2f %% | vegetation %.2f %%\n', p(urban), p(veg));
-
-info = geotiffinfo(f);
-geotiffwrite(fullfile(P.processed,'mask_analysis.tif'), uint8(analysis), R, ...
-    'GeoKeyDirectoryTag', info.GeoTIFFTags.GeoKeyDirectoryTag);
-save(fullfile(P.processed,'masks.mat'), 'perm_water','steep','urban','veg', ...
-     'analysis','slope','-v7.3');
-
-%% Section F - the masks figure
-% FIX 4: show every ds-th pixel so a big scene does not freeze MATLAB
-ds = max(1, floor(max(nr,nc)/1500));
-ri = 1:ds:nr;  ci = 1:ds:nc;
-
-figure('Color','w','Position',[80 80 940 760]);
-subplot(2,2,1); imagesc(slope(ri,ci)); axis image off; colorbar; caxis([0 30]);
-title('Slope (deg)');
-subplot(2,2,2); imagesc(perm_water(ri,ci)); axis image off; caxis([0 1]);
-colormap(gca, gray(2)); title('JRC permanent water');
-subplot(2,2,3); imagesc(urban(ri,ci) + 2*veg(ri,ci)); axis image off; caxis([0 2]);
-colormap(gca, parula(3)); title('WorldCover: 1 urban, 2 vegetation');
-subplot(2,2,4); imagesc(analysis(ri,ci)); axis image off; caxis([0 1]);
-colormap(gca, gray(2)); title('Analysis domain (white = used)');
-saveas(gcf, fullfile(P.out,'masks_overview.png'));
-
-%% Section G - masks self-check
-fprintf('\n--- step2 masks verification ---\n');
-if isequal(size(slope), size(I)) && isequal(size(perm_water), size(I)) && isequal(size(wc), size(I))
-    fprintf('PASS  all layers have the S1 grid size\n');
-else
-    fprintf('FAIL  a layer does not match the S1 grid size\n');
-end
-s = slope(isfinite(slope));
-if ~isempty(s) && all(s >= 0 & s <= 90)
-    fprintf('PASS  slope is within 0-90 deg (max %.1f)\n', max(s));
-else
-    fprintf('FAIL  slope is empty or has values outside 0-90 deg\n');
-end
-
-% FIX 5: a layer that does not cover the scene would silently mask nothing
-cov_dem = 100*nnz(isfinite(slope) & valid)/nnz(valid);
-cov_wc  = 100*nnz(isfinite(wc)    & valid)/nnz(valid);
-if cov_dem >= 99
-    fprintf('PASS  DEM covers %.1f %% of the scene\n', cov_dem);
-else
-    fprintf('FAIL  DEM covers only %.1f %% of the scene - download a larger area\n', cov_dem);
-end
-if cov_wc >= 99
-    fprintf('PASS  WorldCover covers %.1f %% of the scene\n', cov_wc);
-else
-    fprintf('FAIL  WorldCover covers only %.1f %% of the scene - download a larger area\n', cov_wc);
-end
-if p(perm_water) > 0
-    fprintf('PASS  JRC found permanent water (%.2f %%) - the Brahmaputra is in the scene\n', p(perm_water));
-else
-    fprintf('FAIL  JRC found NO permanent water - check the JRC tile covers the scene\n');
-end
-
-%% ========================= PART 2 - THE FIVE THRESHOLDS =========================
-% Mirrors code/confidence/alternative_members.py (kittler_threshold, gmm_threshold).
-
-%% Section H - load both polarizations once
-% false = all valid pixels (matches the Python tables); true = analysis domain only
-USE_MASK_FOR_THRESHOLDS = false;
-
-inside = true(size(I));
-if USE_MASK_FOR_THRESHOLDS, inside = analysis; end
-
-VV = I;                                          % already loaded in Section A
-x = VV(~isnan(VV) & inside);                     % -> Otsu VV, Kittler, GMM
+%% ---- load both polarizations once ----
+[VV,~] = readgeoraster(fullfile(P.processed,'s1_post_vv_db.tif'),'OutputType','double');
+VV(VV == -9999) = NaN;
+x = VV(~isnan(VV));                 % VV valid pixels -> Otsu VV, Kittler, GMM
 
 [VH,~] = readgeoraster(fullfile(P.processed,'s1_post_vh_db.tif'),'OutputType','double');
 VH(VH == -9999) = NaN;
-y = VH(~isnan(VH) & inside);                     % -> Otsu VH
+y = VH(~isnan(VH));                 % VH valid pixels -> Otsu VH
 
-fprintf('\nVV used %d px | VH used %d px\n', numel(x), numel(y));
+fprintf('VV valid %d px | VH valid %d px\n', numel(x), numel(y));
 
-%% Section I - the five thresholds
+%% ---- the five thresholds ----
 t_vv      = otsu_db(x);
 t_vh      = otsu_db(y);
 t_change  = -3.0;                   % fixed in code/config/config.yaml
@@ -177,7 +26,7 @@ fprintf('Otsu VH = %8.4f dB   (Python -17.3090)\n', t_vh);
 fprintf('Kittler = %8.4f dB   (Python -14.0180)\n', t_kittler);
 fprintf('GMM     = %8.4f dB   (Python -10.2654)\n', t_gmm);
 
-%% Section J - write thresholds.csv and self-check against the Python tables
+%% ---- write thresholds.csv and self-check against the Python tables ----
 M = readtable(fullfile(P.tables,'mask_stats.csv'),'TextType','string');
 C = readtable(fullfile(P.tables,'candidate_members.csv'),'TextType','string');
 expv = @(tbl,name) tbl.threshold(strcmp(tbl.method,name));
@@ -190,7 +39,6 @@ ref  = struct('otsu_vv',expv(M,'otsu_vv'),'otsu_vh',expv(M,'otsu_vh'), ...
 names = {'otsu_vv','otsu_vh','change_vv','kittler','gmm'};   % report order
 fid = fopen(fullfile(P.out,'thresholds.csv'),'w');
 fprintf(fid,'method,threshold\n');
-fprintf('\n--- step2 thresholds verification ---\n');
 for k = 1:numel(names)
     n = names{k};  v = vals.(n);  e = ref.(n);
     fprintf(fid,'%s,%.4f\n', n, v);
@@ -204,26 +52,7 @@ end
 fclose(fid);
 fprintf('Wrote %s\n', fullfile(P.out,'thresholds.csv'));
 
-%% Section K - what the masks remove from the "water-looking" pixels
-dark = valid & (VV < t_vv);                      % darker than the Otsu VV threshold
-fprintf('\ndark pixels (VV < %.2f dB): %d\n', t_vv, nnz(dark));
-fprintf('  removed as permanent water : %5.1f %%\n', 100*nnz(dark & perm_water)/nnz(dark));
-fprintf('  removed as steep terrain   : %5.1f %%\n', 100*nnz(dark & steep & ~perm_water)/nnz(dark));
-fprintf('  left as flood candidates   : %5.1f %%\n', 100*nnz(dark & analysis)/nnz(dark));
-
-%% ============================ local functions ============================
-
-function B = sample_on_grid(A, RA, lat, lon, method)
-% Sample raster A (referenced by RA) at the S1 pixel lat/lon.
-% Works for lat/lon rasters and projected (UTM) rasters. NaN outside A.
-if isa(RA,'map.rasterref.GeographicCellsReference')
-    [xi, yi] = geographicToIntrinsic(RA, lat, lon);
-else
-    [xq, yq] = projfwd(RA.ProjectedCRS, lat, lon);
-    [xi, yi] = worldToIntrinsic(RA, xq, yq);
-end
-B = interp2(A, xi, yi, method);
-end
+%% ======================= local functions =======================
 
 function t = otsu_db(v)
 % Otsu threshold in dB. graythresh needs [0,1], so rescale in and back out.
