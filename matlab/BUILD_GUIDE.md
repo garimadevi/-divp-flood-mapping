@@ -177,6 +177,11 @@ flowchart LR
 consumes `masks.mat`; it does not rebuild the masks). `check_terrain` is a
 verification utility with no place in the pipeline — run it any time.
 
+`out/masks.mat` is **gitignored** (3.4 MB binary, `.gitignore:30`). Anyone who
+clones the repo must run `step3_masks` once before `step3_comparing_algorithms`,
+otherwise the latter stops with `Missing input file: ...masks.mat`. The `.csv` and
+`.png` outputs *are* committed, so the figures are visible without running anything.
+
 **Naming note:** MATLAB script names must start with a **letter** — `01_read.m` is
 invalid and can only be run via `run('01_read.m')`. Hence `step1_…`, `step2_…`.
 
