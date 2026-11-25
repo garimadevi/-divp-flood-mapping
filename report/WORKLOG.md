@@ -306,7 +306,7 @@ Append one entry per working day. Keep each entry short and factual. This is the
 - `outputs/tables/ensemble_area.csv`; `report/claims_ledger.md` C-009, C-024–C-027; ADR-24 in `report/decisions.md`
 **Result (verified):**
 - MATLAB: six masks 6/6 PASS; at Python's thresholds five of six match to 0.0 % and `change_vv` is pixel-identical (0/1,081,731 px, Kittler 4 px); pairwise kappa within 0.0015; ADR-23 area 136.13 vs 136.47 km² (Δ 0.25 %).
-- Pre-event test: the 50 % cut removes 91.24 km², of which 90.4 % was already water 12 days before the flood and only 5.0 % becomes water at the peak. Moving to 90 % re-admits a 64.9 km² band that is 94.7 % water in Sentinel-2 (the seasonal channel).
+- Pre-event test: the 50 % cut removes 91.24 km², of which 90.4 % was already water 12 days before the flood and only 5.0 % becomes water at the peak. Moving to 90 % re-admits a 64.03 km² band that is 94.7 % water in Sentinel-2 (the seasonal channel).
 - Fixed-evaluation-set F1 at JRC 0/50/90: 0.8167 / 0.8138 / 0.8162 (Δ ≤ 0.003), so the cut is definitional, not an accuracy lever. Slope 10→20° adds 1.27 km² (+0.9 %). Adaptive window 51→151 gives 5.63→18.13 km².
 - With/without permanent-water masking (ADR-06): 136.47 vs 224.24 km².
 **Correction:** `ensemble_area.py` initially summed the mask rasters without intersecting the analysis domain, so it read 122.93 / 136.83 km². `clean()` closes after masking, and closing spills up to 0.36 km² (0.26 %) outside the domain; `agreement.py` and `validate.py` both clip. Fixed → 122.60 / 136.47 km². The adaptive row now equals `confidence_classes.csv` (33.925 + 84.765 + 3.905 = 122.595), which is the consistency check that caught it. Report, ledger, and MATLAB acceptance updated.
