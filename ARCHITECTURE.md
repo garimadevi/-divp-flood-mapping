@@ -219,6 +219,7 @@ flowchart LR
 | `bootstrap_ci.py` | 500 m spatial block bootstrap, 1000 reps, 95% CIs |
 | `cross_terrain.py` | fit threshold on farmland vs urban, transfer, measure F1 drop |
 | `ensemble_area.py` | k ≥ 2 area of each 4-member ensemble (adaptive vs adopted GMM) |
+| `static_masks_sensitivity.py` | JRC/slope/adaptive sensitivity + pre-event test of the 50 % cut |
 | `lee_effect.py` | speckle filter effects: 23.9 km² false water removed, 1.08 km² lost |
 
 Key findings:
@@ -256,7 +257,7 @@ code/
   confidence/     agreement.py · validate.py · alternative_members.py
                   sensitivity_drop_adaptive.py · bootstrap_ci.py
                   validation_viz.py · cross_terrain.py · lee_effect.py
-                  ensemble_area.py
+                  ensemble_area.py · static_masks_sensitivity.py
 notebooks/        00_data_acquisition … 09_bootstrap_ci
 report/           DRAFT_REPORT.md · decisions.md · claims_ledger.md
                   WORKLOG.md · PROGRESS.md · references/references.bib

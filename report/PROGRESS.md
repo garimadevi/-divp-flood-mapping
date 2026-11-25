@@ -1,11 +1,12 @@
 # Step-by-Step Progress & Save File
 
-**Last updated:** 7 November 2026 (Day 5)
+**Last updated:** 25 November 2026 (pre-presentation, 27 Nov)
 **Project:** Confidence-Aware Flood Mapping — Guwahati / Brahmaputra (riverine pivot, ADR-20)
 **Purpose:** This is the living save point. Open this file first. It shows exactly which step we are on, what is done, what is next, and where every artefact lives.
 
 > `HANDOFF.md` holds the full project context; this file holds the **execution path**.
 > Notebooks live in `notebooks/`; the original scripts stay in `code/` as the canonical CLI.
+> The MATLAB re-implementation has its own guide: `matlab/BUILD_GUIDE.md`.
 
 ---
 
@@ -13,19 +14,23 @@
 
 | Item | Value |
 |---|---|
-| Current step | **Step 12 — Report results + claims rows** |
-| Status | In progress |
-| Last completed step | Step 11 — Validation (S2 MNDWI metrics + reliability curve) |
+| Current step | **Step 17 — Final report + slides** (analysis complete) |
+| Status | Results frozen; report + deck in progress |
+| Last completed step | MATLAB chain: step1 → step3_masks → step3_comparing_algorithms (all gates PASS) |
 | Event | Brahmaputra riverine flood, 23 June 2023 (pivot from urban, ADR-20) |
 | Data | `data/raw/`, `data/processed/`, `data/manifest.json` (wider AOI) |
-| Last commit | `c4796be` (stack + four masks, pre-pivot) |
-| Uncommitted work | Riverine pivot (config/data/masks/confidence/validation) + ADR-20/21 |
+| Last commit | see `git log --oneline -1` (repository is the source of truth) |
+| Uncommitted work | `git status --short` |
 
 **Next 3 actions**
 
-1. Create `notebooks/04_confidence_agreement.ipynb` and `notebooks/05_validation.ipynb` mirroring `code/confidence/*.py`, and refresh notebooks 00-03 for the new event/AOI.
-2. Update `report/DRAFT_REPORT.md` Results/Conclusion with the validated riverine findings (binary flood F1 0.81; H1 rejected — reliability non-monotonic).
-3. Fix the notebook-03 base-domain discrepancy (use `base & slope_ok` = 727.4 km²), then commit the pivot.
+1. Finish `matlab/step4_confidence.m` → `step5_validate.m` → `step6_verify.m` (acceptance values in `matlab/BUILD_GUIDE.md` §2).
+2. Build the slide deck from `report/DRAFT_REPORT.md` §8 (mask table, reliability curve, static-mask sensitivity, MATLAB PASS table).
+3. Mock viva: the seven attacks (JRC 50, threshold tolerance, kappa pixel set, adaptive instability, bootstrap, S2 reference, tool independence).
+
+> Step 12 (results + claims rows) and step 13 (commit/push) are complete; the
+> tracker rows below are kept for provenance. Steps 14–16 (pothole / hazard
+> modules) were part of the earlier plan and are not in the presented scope.
 
 ---
 
@@ -47,8 +52,8 @@ Status: `[x]` done · `[~]` in progress · `[ ]` pending · `[!]` blocked · `[-
 | 9 | Agreement confidence map (k/N classes) | `04_confidence_agreement` | `confidence/agreement.py` | confidence GeoTIFF + class stats + figure | [x] |
 | 10 | Mask redundancy decision (adaptive κ≈0.06 degrades High) | — | — | ADR-21 in `decisions.md` | [x] |
 | 11 | Validation: S2 MNDWI + reliability curve | `05_validation` | `confidence/validate.py` | metrics by method/class, reliability curve | [x] |
-| 12 | Report Results update with claims rows | — | — | `DRAFT_REPORT.md`, `claims_ledger.md` | [ ] |
-| 13 | Commit + push Day 3–4 work | — | — | clean git state | [ ] |
+| 12 | Report Results update with claims rows | — | — | `DRAFT_REPORT.md`, `claims_ledger.md` | [x] |
+| 13 | Commit + push Day 3–4 work | — | — | clean git state | [x] |
 | 14 | Pothole module (RDD2022 → Mapillary) | `06_pothole` | `pothole/*.py` | domain-gap F1 | [ ] |
 | 15 | OSM road-hazard ranking | `07_hazard` | `hazard/*.py` | ranked road map + table | [ ] |
 | 16 | Optional: enhancement / FwDET / persistence | `08_optional` | — | add-on chapter | [ ] |

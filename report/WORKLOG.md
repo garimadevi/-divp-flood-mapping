@@ -295,3 +295,23 @@ Append one entry per working day. Keep each entry short and factual. This is the
 **Next:** Final review; optionally the stratified manual sample and cross-scene generalization remain as Future Work.
 
 ---
+
+## 2026-11-25 — Pre-presentation (MATLAB chain + static-mask sensitivity)
+
+**Did:** (1) Rebuilt the MATLAB image-processing chain: `step3_masks.m` (six masks), `check_terrain.m` (terrain cross-check), and rewired `step3_comparing_algorithms.m` to consume `masks.mat` over the canonical `base` domain. (2) Added `code/confidence/static_masks_sensitivity.py`, which tests the 50 % JRC cut against the pre-event image and runs a one-at-a-time parameter sensitivity. (3) Added `code/confidence/ensemble_area.py` to record the k ≥ 2 area of both 4-member ensembles.
+**Why:** The MATLAB layer is the tool-independence proof; the JRC sensitivity answers the question "why 50 % and not 90 %" with measurement rather than precedent. ADR-06 also promised a with/without permanent-water comparison (ledger C-009, still `planned`).
+**Evidence:**
+- `matlab/step3_masks.m`, `step3_comparing_algorithms.m`, `check_terrain.m`; `matlab/out/mask_areas.csv`, `kappa_vs_python.csv`, `terrain_check.csv`
+- `code/confidence/static_masks_sensitivity.py`; `outputs/tables/jrc_preevent_test.csv`, `static_masks_sensitivity.csv`, `adaptive_member_sensitivity.csv`, `jrc_validation_sensitivity.csv`
+- `outputs/tables/ensemble_area.csv`; `report/claims_ledger.md` C-009, C-024–C-027; ADR-24 in `report/decisions.md`
+**Result (verified):**
+- MATLAB: six masks 6/6 PASS; at Python's thresholds five of six match to 0.0 % and `change_vv` is pixel-identical (0/1,081,731 px, Kittler 4 px); pairwise kappa within 0.0015; ADR-23 area 136.13 vs 136.47 km² (Δ 0.25 %).
+- Pre-event test: the 50 % cut removes 91.24 km², of which 90.4 % was already water 12 days before the flood and only 5.0 % becomes water at the peak. Moving to 90 % re-admits a 64.9 km² band that is 94.7 % water in Sentinel-2 (the seasonal channel).
+- Fixed-evaluation-set F1 at JRC 0/50/90: 0.8167 / 0.8138 / 0.8162 (Δ ≤ 0.003), so the cut is definitional, not an accuracy lever. Slope 10→20° adds 1.27 km² (+0.9 %). Adaptive window 51→151 gives 5.63→18.13 km².
+- With/without permanent-water masking (ADR-06): 136.47 vs 224.24 km².
+**Correction:** `ensemble_area.py` initially summed the mask rasters without intersecting the analysis domain, so it read 122.93 / 136.83 km². `clean()` closes after masking, and closing spills up to 0.36 km² (0.26 %) outside the domain; `agreement.py` and `validate.py` both clip. Fixed → 122.60 / 136.47 km². The adaptive row now equals `confidence_classes.csv` (33.925 + 84.765 + 3.905 = 122.595), which is the consistency check that caught it. Report, ledger, and MATLAB acceptance updated.
+**Conclusion:** The permanent-water cut is now defended by what it removes (90.4 % pre-existing water), not by the date it was chosen. The 136.83 → 136.47 km² correction is a definition fix, not a change of result; precision/recall/F1 are unaffected because validation always intersected with the domain.
+**Blockers:** None.
+**Next:** `step4_confidence.m` → `step5_validate.m` → `step6_verify.m`; slides; mock viva.
+
+---

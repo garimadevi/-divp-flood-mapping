@@ -1,0 +1,7 @@
+mode,jrc_cut,domain_km2,evaluable_km2,reference_water_km2,precision,recall,f1,iou,overall_accuracy,tp,fp,fn,tn,note
+own_domain,0,818.60,632.42,170.28,0.8962,0.8792,0.8876,0.7979,0.94,1497105,173453,205687,4447914,reference and evaluation set move with the domain
+own_domain,50,727.35,555.00,95.98,0.8264,0.8016,0.8138,0.6861,0.9366,769405,161621,190390,4428616,canonical
+own_domain,90,791.38,612.70,150.59,0.8823,0.8627,0.8724,0.7736,0.938,1299168,173366,206754,4447715,reference and evaluation set move with the domain
+fixed_domain,0,818.60,555.00,95.98,0.8262,0.8074,0.8167,0.6902,0.9373,774924,163018,184871,4427219,same evaluation set for every map
+fixed_domain,50,727.35,555.00,95.98,0.8264,0.8016,0.8138,0.6861,0.9366,769405,161621,190390,4428616,canonical
+fixed_domain,90,791.38,555.00,95.98,0.8261,0.8065,0.8162,0.6894,0.9372,774056,162976,185739,4427261,same evaluation set for every map

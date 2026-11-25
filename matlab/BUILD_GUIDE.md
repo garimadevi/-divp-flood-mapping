@@ -98,28 +98,29 @@ Quote the right-hand column when asked "does MATLAB really reproduce Python?" �
 quoting the middle column understates it.
 
 > Areas from `candidate_members.csv` are ~0.3 % smaller than `mask_stats.csv` for the
-> same mask — the two Python scripts use slightly different valid-pixel bases. Use
-> `mask_stats.csv` for the four core masks and `candidate_members.csv` for
-> Kittler/GMM, and don't chase a 0.3 % difference.
+> three core masks because `alternative_members.py` intersects them with the analysis
+> domain when it reads them back (`& domain`), while `mask_stats.csv` records the
+> post-morphology raster area. `clean()` closes *after* masking, so up to 0.36 km²
+> (0.26 %) of a mask can spill onto steep/permanent pixels at the domain edge. Use
+> `mask_stats.csv` for the raster areas, and the domain-clipped values (or
+> `ensemble_area.csv`) whenever you quote what the flood map covers.
 
 ### Binary flood-map area (k ≥ 2)
 
 | Ensemble | k ≥ 2 | k ≥ 3 | k ≥ 4 |
 |---|---|---|---|
-| adaptive as 4th (original) | 122.93 km² | 88.77 | 3.91 |
-| **GMM as 4th (adopted)** | **136.83 km²** | 121.43 | 87.63 |
+| adaptive as 4th (original) | 122.60 km² | 88.67 | 3.91 |
+| **GMM as 4th (adopted)** | **136.47 km²** | 121.09 | 87.53 |
 
 Source: `outputs/tables/ensemble_area.csv` (`code/confidence/ensemble_area.py`),
-computed from the same mask rasters the report uses. Two numbers are in circulation
-and both are correct:
+computed from the same mask rasters the report uses, **intersected with the analysis
+domain** exactly as `agreement.py` and `validate.py` do. That is why the adaptive row
+now equals the sum of `confidence_classes.csv` (33.925 + 84.765 + 3.905 = 122.595 km²)
+— a useful consistency check, not a coincidence. Before the domain intersection this
+script read 122.93 km², the 0.3 % morphological spill above.
 
-- **122.59 km²** — `confidence_classes.csv`, i.e. `agreement.py`'s own masks
-  (low + medium + high). This is the *adaptive* ensemble.
-- **122.93 km²** — the same ensemble rebuilt from `outputs/maps/masks/*.tif`
-  (the 0.3 % base difference above).
-
-The **adopted** GMM ensemble's binary map is **136.83 km²**; MATLAB reproduces it at
-136.42 km² (Δ 0.30 %), the same threshold-offset effect as the masks.
+The **adopted** GMM ensemble's binary map is **136.47 km²**; MATLAB reproduces it at
+136.13 km² (Δ 0.25 %), the same threshold-offset effect as the masks.
 
 ### Final ensemble (adopted: Otsu VV + Otsu VH + change + GMM, flood = k ≥ 2)
 
@@ -381,7 +382,7 @@ to reproduce `mask_kappa.csv`; state which set you used whenever you quote a kap
 - [x] `step2`: **done 24 Nov** — five scalar thresholds, 5/5 within ±0.25 dB; Kittler **exact** (−14.0180), GMM Δ 0.0078 dB
 - [x] `step3`: **done 25 Nov** — six masks, 6/6 PASS; at Python's thresholds five match to 0.0 %, `change_vv` pixel-identical, Kittler 4 px; adaptive median −9.5725 dB (Δ 0.004)
 - [x] `check_terrain` (Pritom): **done 25 Nov** — slope correlation 1.0000, permanent water 0.00 % disagreement, domain 727.10 vs 727.36 km²
-- [x] `step3_comparing_algorithms` (Pritom): **done 25 Nov** — six pairwise kappas vs `mask_kappa.csv` all within 0.0015; ADR-23 k ≥ 2 = 136.42 km² vs Python 136.83
+- [x] `step3_comparing_algorithms` (Pritom): **done 25 Nov** — six pairwise kappas vs `mask_kappa.csv` all within 0.0015; ADR-23 k ≥ 2 = 136.13 km² vs Python 136.47 (Δ 0.25 %)
 - [ ] `step4`: class areas 3.905 / 84.765 / 33.925 km²; flood map = k ≥ 2 (**next**)
 - [ ] `step5`: precision 0.8264, recall 0.8016, F1 0.8138; curve Dry < Low < Med < High
 - [ ] `step6`: PASS/FAIL table prints all-green (screenshot for a slide)

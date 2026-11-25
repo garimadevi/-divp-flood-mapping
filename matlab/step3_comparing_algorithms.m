@@ -106,8 +106,15 @@ EA   = readtable(need{3},'TextType','string');
 ens4 = {'otsu_vv','otsu_vh','change_vv','gmm'};
 v4   = sum(Fd(:, ismember(names, ens4)), 2);
 gmm_km2 = EA.k_ge2_km2(strcmp(EA.ensemble,'gmm_4th'));
-fprintf('ADR-23 ensemble (4 members, k >= 2): %.2f km2   (Python %s %0.2f km2)\n', ...
-        nnz(v4 >= 2)*PIX_M^2/1e6, 'gmm_4th', gmm_km2);
+% TRAP: kappa is computed over `base`, but the FLOOD MAP is defined on the
+% analysis domain. Mask Fd rows so the ADR-23 area is comparable with
+% ensemble_area.csv (which intersects with the domain, as agreement.py does).
+dom_in_base = S.domain(dom);
+v4a         = sum(Fd(:, ismember(names,{'otsu_vv','otsu_vh','change_vv','adaptive_vv'})), 2);
+adr23_km2   = nnz((v4 >= 2) & dom_in_base) * PIX_M^2/1e6;
+adr23a_km2  = nnz((v4a >= 2) & dom_in_base) * PIX_M^2/1e6;
+fprintf('ADR-23 ensemble (4 members, k >= 2): %.2f km2   (Python gmm_4th %.2f km2)\n', ...
+        adr23_km2, gmm_km2);
 
 kcons = zeros(1,nM);  kloo = zeros(1,nM);
 for k = 1:nM
@@ -220,9 +227,9 @@ report(abs(ks) < 0.01, sprintf('shuffled mask gives kappa %.4f (chance level is 
 report(all(isfinite(KAPPA(:))) && all(KAPPA(:) >= -1 & KAPPA(:) <= 1), ...
        'all kappa values are defined and inside [-1, 1]');
 report(paired_ok, 'every pairwise kappa agrees with mask_kappa.csv to within 0.02');
-report(abs(nnz(v4 >= 2)*1e-4 - gmm_km2)/gmm_km2 < 0.01, ...
+report(abs(adr23_km2 - gmm_km2)/gmm_km2 < 0.01, ...
        sprintf('ADR-23 k>=2 area %.2f km2 within 1 %% of the Python GMM ensemble %.2f km2', ...
-               nnz(v4>=2)*1e-4, gmm_km2));
+               adr23_km2, gmm_km2));
 if any(prevalence < 1)
     fprintf('WARN  a method flags < 1 %% of the comparison set: kappa is unstable at low prevalence\n');
 end
@@ -241,8 +248,7 @@ fprintf(['Most redundant method under a strict-majority-of-%d rule: %s ' ...
         nM, names{redundant}, kloo(redundant));
 fprintf(['NB: strict majority is not the adopted rule. Under ADR-23 (k >= 2) the 4th member ' ...
          'sets the binary area (adaptive %.1f -> GMM %.1f km2), which is why GMM is retained.\n'], ...
-        nnz(sum(Fd(:, ismember(names,{'otsu_vv','otsu_vh','change_vv','adaptive_vv'})),2) >= 2)*1e-4, ...
-        nnz(v4 >= 2)*1e-4);
+        adr23a_km2, adr23_km2);
 
 %% ============================ local functions ============================
 

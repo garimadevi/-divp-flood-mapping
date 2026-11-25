@@ -268,3 +268,20 @@ Decision rule: PASS if D1-D3 and the primary signal and optical gates hold; PASS
 **Decision:** Adopt **GMM** as the 4th ensemble member: it restores a monotonic 4-method reliability curve while giving the best binary F1 (0.8138) and highest recall (80.2%). Kittler is noted as a strong alternative (highest single-method precision 92.5%, monotonic). The adaptive member is removed from the confidence rule (superseded by ADR-22).
 **Evidence:** `code/confidence/alternative_members.py`; `outputs/tables/candidate_members.csv`, `ensemble_4th_member.csv`, `leave_one_out.csv`; `outputs/figures/candidate_members.png`, `alternative_members_reliability.png`.
 **Consequence:** Final confidence rule is a 4-method ensemble (Otsu VV, Otsu VH, change VV, GMM), flood-positive k ≥ 2, monotonic High > Medium > Low reliability. Report this as the refined conclusion of H1: agreement predicts reliability when the ensemble members genuinely measure the same signal (kappa ≈ 0.8), and fails when a member is uncorrelated and low-recall (adaptive, kappa ≈ 0.06).
+
+---
+
+## ADR-24 — The 50 % JRC cut is retained, justified by what it removes rather than by its date
+
+**Status:** accepted
+**Context:** The JRC occurrence cut (ADR-06) is the highest-leverage static parameter, and "we fixed it a priori" is not an answer to "why 50 and not 90". The mask's purpose is to stop water that was already present from being counted as flood, which is directly testable against the pre-event image.
+**Test:** For every JRC occurrence band, measure (a) the fraction that is water in the 11 June pre-event SAR and (b) the fraction that only becomes water at the 23 June peak. Then hold every other parameter fixed and move one at a time, rebuilding the adopted GMM ensemble.
+**Result:**
+- The 50 % cut removes 91.24 km², of which **90.4 % was already water pre-event** and only **5.0 %** becomes water at the peak.
+- Occurrence bands are monotonic: 10–20 % → 25.7 % already wet, 30–40 % → 56.9 %, 50–60 % → 76.6 %, 90–100 % → 97.8 %. Below 40 %, 12–24 % of pixels genuinely become new water (floodable floodplain that must not be masked).
+- JRC 0 / 50 / 90 gives 224.24 / 136.47 / 196.91 km² at k ≥ 2. The 50–89 % band that 90 % re-admits is 94.7 % water in Sentinel-2: it is the seasonal channel, not flood.
+- On a **fixed evaluation set** F1 is 0.8167 / 0.8138 / 0.8162 at JRC 0 / 50 / 90 (Δ ≤ 0.003). The "own-domain" F1 (0.8876 / 0.8138 / 0.8724) rises only because the reference moves with the domain. The cut is therefore definitional, not an accuracy lever.
+- Slope is immaterial (10→20° adds 1.27 km², +0.9 %); the adaptive member is unstable by construction (window 51→151: 5.63→18.13 km²; k 1.5→2.0: 0.67 km²), which independently supports its exclusion from the ensemble.
+**Decision:** Retain 50 %. Treat it as the conservative end of a defensible range (~40–60 %), not as an absolute truth; say "water more than half the time", since GSW's own permanent/seasonal split comes from its seasonality layer rather than a 50 % occurrence cut.
+**Evidence:** `code/confidence/static_masks_sensitivity.py`; `outputs/tables/jrc_preevent_test.csv`, `static_masks_sensitivity.csv`, `adaptive_member_sensitivity.csv`, `jrc_validation_sensitivity.csv`.
+**Consequence:** Closes claims-ledger C-009 and discharges ADR-06's promised with/without permanent-water comparison (224.24 vs 136.47 km²). §8 and §10 of the report now state the definitional nature of the cut; the viva answer is the 90.4 % pre-event figure, not the date the value was chosen.

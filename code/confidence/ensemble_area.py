@@ -12,6 +12,12 @@ which leaves two loose ends:
 This script computes both from the mask rasters that the report's numbers come
 from (outputs/maps/masks/*.tif), so the value is traceable to a file.
 
+The masks are intersected with the analysis domain, exactly as agreement.py and
+validate.py do. This matters: `clean()` runs a closing *after* masking, so the
+stored rasters can spill up to ~0.3 % of their area onto steep/permanent pixels
+at the domain edge. Without the intersection the adaptive row would read
+122.93 km2 instead of the 122.595 km2 that agreement.py's class table sums to.
+
 Outputs: outputs/tables/ensemble_area.csv
 """
 
@@ -34,22 +40,34 @@ ENSEMBLES = {
 }
 
 
-def read_mask(path: Path) -> np.ndarray:
+def read(path: Path) -> np.ndarray:
     with rasterio.open(path) as src:
-        return src.read(1) > 0
+        return src.read(1)
+
+
+def read_mask(path: Path) -> np.ndarray:
+    return read(path) > 0
 
 
 def main() -> int:
     cfg = load_config()
+    processed = rel_path(cfg, "data_processed")
     masks_dir = rel_path(cfg, "outputs") / "maps" / "masks"
     tables = rel_path(cfg, "outputs") / "tables"
     px_km2 = (cfg["grid"]["resolution_m"] ** 2) / 1e6
 
+    # The analysis domain, built exactly as agreement.py / validate.py build it.
+    post_vv = read(processed / "s1_post_vv_db.tif")
+    slope = read(processed / "slope_deg.tif")
+    permanent = read(processed / "masks" / "permanent_water.tif")
+    valid = (post_vv != -9999.0) & (slope != -9999.0)
+    domain = valid & (permanent == 0) & (slope <= cfg["masks"]["slope_deg_max"])
+
     rows = []
     for name, members in ENSEMBLES.items():
-        k = np.zeros(read_mask(masks_dir / f"{members[0]}.tif").shape, dtype="uint8")
+        k = np.zeros(domain.shape, dtype="uint8")
         for member in members:
-            k += read_mask(masks_dir / f"{member}.tif").astype("uint8")
+            k += (read_mask(masks_dir / f"{member}.tif") & domain).astype("uint8")
         row = {"ensemble": name, "members": "+".join(members), "n_members": len(members)}
         for cut in (2, 3, 4):
             n = int((k >= cut).sum())

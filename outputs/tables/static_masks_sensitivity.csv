@@ -1,0 +1,8 @@
+parameter,value,domain_km2,flood_k2_km2,note
+jrc_occurrence,0,818.598,224.240,no permanent-water mask (ADR-06 comparison)
+jrc_occurrence,50,727.355,136.470,canonical
+jrc_occurrence,70,763.371,169.283,alternative cut
+jrc_occurrence,90,791.381,196.907,alternative cut
+slope_deg_max,10.0,727.355,136.470,canonical
+slope_deg_max,15.0,857.143,137.529,alternative cut
+slope_deg_max,20.0,997.456,137.737,alternative cut
