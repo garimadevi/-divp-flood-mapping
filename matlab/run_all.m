@@ -19,16 +19,16 @@ fprintf('====================================\n\n');
 % Define execution sequence
 scripts = {
     'setup_paths.m'
-    'check_terrain.m'
     'step1_read_filter.m'
     'step2_thresholds.m'
     'step3_masks.m'
     'step3_comparing_algorithms.m'
     'step4_confidence.m'
+    'step5_validate.m'
     'step4_confidence_a.m'
     'step4_confidence_b.m'
-    'step5_validate.m'
     'step6_verify.m'
+    'check_terrain.m'
 };
 
 % Execute scripts sequentially
