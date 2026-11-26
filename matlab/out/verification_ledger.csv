@@ -1,0 +1,36 @@
+id,claim,report_value,measured,tolerance,status
+T1,Otsu VV threshold (dB),-12.5534,-12.6046,0.25,MATCH
+T2,Otsu VH threshold (dB),-17.309,-17.3608,0.25,MATCH
+T3,Kittler threshold (dB),-14.018,-14.018,0.25,MATCH
+T4,GMM threshold (dB),-10.2654,-10.2732,0.25,MATCH
+D1,analysis domain (km2),727.355,727.3545,0.5,MATCH
+F1,final binary precision,0.8266,0.883477142669603,0.03,DIFFERS
+F2,final binary recall,0.8021,0.823492685911341,0.03,MATCH
+F3,final binary F1,0.8139,0.852430960379765,0.03,DIFFERS
+F4,final binary IoU,0.686,0.742814533112413,0.04,DIFFERS
+F5,true positives,769405,592223,38470.25,DIFFERS
+F6,false positives,161621,78109,16162.1,DIFFERS
+F7,false negatives,190390,126937,19039,DIFFERS
+F8,evaluated pixels,5550032,5082697,111000.64,DIFFERS
+C1,class precision Low (%),45.5,44.9565111293162,3,MATCH
+C2,class precision Medium (%),83.7,89.3975951367661,3,DIFFERS
+C3,class precision High (%),88.4,93.8874294609846,3,DIFFERS
+B1,bootstrap F1 CI lower,0.801,0.801229880154325,0.03,MATCH
+B2,bootstrap F1 CI upper,0.826,0.825970491355709,0.03,MATCH
+B3,bootstrap precision CI lower (%),81.1,81.1040476234635,3,MATCH
+B4,bootstrap precision CI upper (%),84.11,84.1095060619173,3,MATCH
+B5,bootstrap recall CI lower (%),78.54,78.5398564709428,3,MATCH
+B6,bootstrap recall CI upper (%),81.62,81.6216074568781,3,MATCH
+K1,kappa Otsu VV vs Otsu VH,0.849,0.850132308633126,0.03,MATCH
+K2,kappa Otsu VV vs change (report 0.76-0.79),0.775,0.788473314274541,0.045,MATCH
+K3,kappa Otsu VH vs change (report 0.76-0.79),0.775,0.765252811276351,0.045,MATCH
+K4,mean kappa adaptive vs the base three (report 0.06-0.08),0.07,0.0677685519906463,0.05,MATCH
+A1,Kittler precision,0.925,0.962263630292851,0.02,DIFFERS
+A2,Kittler recall,0.667,0.727340230268647,0.02,DIFFERS
+A3,GMM precision,0.788,0.833301014980941,0.02,DIFFERS
+A4,GMM recall,0.815,0.836573224317259,0.02,DIFFERS
+R1,with adaptive: High precision (%),77.1,87.456126964749,2,DIFFERS
+R2,with adaptive: Medium precision (%),88.6,93.7437528058118,2,DIFFERS
+R3,without adaptive: High precision (%),88.4,93.8874294609846,2,DIFFERS
+R4,without adaptive: Medium precision (%),82.6,88.5507232298112,2,DIFFERS
+R5,without adaptive: Low precision (%),43.2,42.459398756047,3,MATCH
