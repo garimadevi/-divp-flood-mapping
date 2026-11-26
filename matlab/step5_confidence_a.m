@@ -1,5 +1,5 @@
-%% step6a_remove_adaptive.m - does the adaptive member break the confidence ordering?
-% Mirrors Step 6A of the report (sensitivity analysis):
+%% step5_confidence_a.m - does the adaptive member break the confidence ordering?
+% Ablation of the fourth member (sensitivity analysis):
 %   original ensemble : Otsu VV + Otsu VH + VV change + adaptive   (4 methods)
 %   ablated ensemble  : Otsu VV + Otsu VH + VV change              (3 methods)
 % For each, the observed precision of every confidence class is measured
@@ -13,7 +13,7 @@
 % Writes ONLY to matlab/out. data/processed is Python-owned and read-only here.
 if ~exist('P','var'), setup_paths; end
 
-%% Section A - inputs and the evaluation set (same as step6b)
+%% Section A - inputs and the evaluation set (same as step5_confidence_b)
 f_ref = fullfile(P.out,'s2_water_mndwi.tif');
 if ~isfile(f_ref)
     f_ref = fullfile(P.processed,'reference','s2_water_mndwi.tif');   % <- 1 water, 0 land
@@ -176,7 +176,7 @@ saveas(gcf, fullfile(P.out,'ablation_adaptive.png'));
 
 %% Section G - self-check (numbers from the report)
 near = @(a, b, tol) abs(a - b) <= tol;
-fprintf('\n--- step6a verification ---\n');
+fprintf('\n--- step5_confidence_a verification ---\n');
 report(abs(n_eval - 5550032)/5550032 < 0.02, ...
        sprintf('evaluated pixels %d within 2 %% of the report (5,550,032)', n_eval));
 report(~mono(1) && p_cls(1,4) < p_cls(1,3), ...
@@ -202,7 +202,7 @@ fprintf('With adaptive, High (%.1f %%) is less precise than Medium (%.1f %%).\n'
         100*p_cls(1,4), 100*p_cls(1,3));
 fprintf('Without it, High %.1f %% > Medium %.1f %% > Low %.1f %%: the ordering returns.\n', ...
         100*p_cls(2,4), 100*p_cls(2,3), 100*p_cls(2,2));
-fprintf('Next (step 6b): replace adaptive with Kittler or GMM to keep four members.\n');
+fprintf('Next (step5_confidence_b): replace adaptive with Kittler or GMM to keep four members.\n');
 
 %% ============================ local functions ============================
 
