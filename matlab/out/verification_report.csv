@@ -1,5 +1,5 @@
 layer,status,check
-0 environment,PASS,"MATLAB 2024b (R2020b or newer needed)"
+0 environment,PASS,"MATLAB 2025b (R2020b or newer needed)"
 0 environment,PASS,"Mapping Toolbox licensed"
 0 environment,PASS,"Image Processing Toolbox licensed"
 1 files,PASS,"required: s1_post_vv_db.tif"
