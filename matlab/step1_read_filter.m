@@ -37,7 +37,7 @@ cnt = imfilter(double(vraw), kern, 'symmetric');   % 'symmetric' == scipy 'refle
 mu  = imfilter(L,    kern, 'symmetric') ./ max(cnt,1e-6);
 mu2 = imfilter(L.^2, kern, 'symmetric') ./ max(cnt,1e-6);
 vr  = max(mu2 - mu.^2, 0);
-wgt = vr ./ (vr + mu.^2/looks + 1e-6);            % Lee weight, Cu = 1/L
+wgt = vr ./ (vr + mu.^2/looks + 1e-6);            % ratio gain (see report Eq. 4.1)
 Lf  = mu + wgt.*(L - mu);
 
 Idb  = nan(size(Lf));
