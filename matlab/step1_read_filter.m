@@ -53,7 +53,7 @@ figure('Color','w','Position',[80 80 940 520]);
 
 subplot(1,2,1)
 imagesc(Idb(r0:r0+n-1, c0:c0+n-1)); axis image off
-colormap(gray); caxis([-22 -2]); title('Lee 7\times7, 4 looks');
+colormap(gray); clim([-22 -2]); title('Lee 7\times7, 4 looks');
 set(gca,'Position',[0.05 0.06 0.42 0.80]);      % square box -> no white margins
 hold on
 text(15, 180, 'Brahmaputra channel (water)', 'Color','w', 'FontSize',10, 'FontWeight','bold');
@@ -64,7 +64,7 @@ hold off
 
 subplot(1,2,2)
 imagesc(10*log10(Lraw(r0:r0+n-1, c0:c0+n-1))); axis image off
-colormap(gray); caxis([-22 -2]); title('raw \rightarrow dB (speckle)');
+colormap(gray); clim([-22 -2]); title('raw \rightarrow dB (speckle)');
 set(gca,'Position',[0.53 0.06 0.42 0.80]);
 hold on
 plot([15 115], [288 288], 'k-', 'LineWidth', 3);

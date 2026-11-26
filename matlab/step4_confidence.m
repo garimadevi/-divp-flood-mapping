@@ -128,7 +128,7 @@ cmap = [0.35 0.35 0.35;      % not analysed
 
 asp = numel(ci) / max(numel(ri), 1);
 figure('Color','w','Position',[80 80 1000 round(1000/asp) + 80]);
-imagesc(cls(ri,ci)); axis image off; colormap(cmap); caxis([-0.5 4.5]);
+imagesc(cls(ri,ci)); axis image off; colormap(cmap); clim([-0.5 4.5]);
 cb = colorbar; cb.Ticks = 0:4; cb.TickLabels = cn;
 title(sprintf('Flood confidence from vote count k (%d methods, flood = k \\geq %d)', N, K_FLOOD));
 saveas(gcf, fullfile(P.out,'confidence_map.png'));

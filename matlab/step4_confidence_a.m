@@ -14,7 +14,10 @@
 if ~exist('P','var'), setup_paths; end
 
 %% Section A - inputs and the evaluation set (same as step6b)
-f_ref = fullfile(P.processed,'reference','s2_water_mndwi.tif');   % <- edit: 1 water, 0 land
+f_ref = fullfile(P.out,'s2_water_mndwi.tif');
+if ~isfile(f_ref)
+    f_ref = fullfile(P.processed,'reference','s2_water_mndwi.tif');   % <- 1 water, 0 land
+end
 need = {fullfile(P.out,'masks.mat'), f_ref};
 for q = 1:numel(need)
     if ~isfile(need{q}), error('Missing input file: %s', need{q}); end

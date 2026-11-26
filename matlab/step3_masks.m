@@ -146,7 +146,7 @@ figure('Color','w','Position',[60 60 figw figh]);
 tiledlayout(2,3,'Padding','compact','TileSpacing','compact');
 for k = 1:nM
     nexttile;
-    imagesc(masks.(names{k})(ri,ci)); axis image off; caxis([0 1]);
+    imagesc(masks.(names{k})(ri,ci)); axis image off; clim([0 1]);
     colormap(gca, [0.94 0.94 0.94; 0.09 0.32 0.72]);
     title(sprintf('%s  -  %.2f km^2  (thr %.2f dB)', names{k}, area_mat(k), t_mat(k)), ...
           'FontSize',10);

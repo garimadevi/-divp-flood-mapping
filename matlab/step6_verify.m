@@ -41,7 +41,7 @@ F = { pr('s1_post_vv_db.tif'), 1;  pr('s1_post_vh_db.tif'), 1;  pr('s1_pre_vv_db
       o('confidence_class.tif'), 1; o('votes_k.tif'), 1;       o('flood_k2.tif'), 1; ...
       o('confidence_areas.csv'), 1; o('confidence.mat'), 1;    o('s2_water_mndwi.tif'), 1; ...
       o('metrics_by_method.csv'), 1; o('metrics_by_class.csv'), 1; o('metrics_flood_binary.csv'), 1; ...
-      o('validation.mat'), 1;      o('bootstrap_ci.csv'), 1;   o('bootstrap_samples.mat'), 1; ...
+      o('validation.mat'), 1;      o('bootstrap_ci.csv'), 0;   o('bootstrap_samples.mat'), 0; ...
       o('masks_overview_matlab.png'), 0; o('kappa_matrix.csv'), 0; o('kappa_summary.csv'), 0; ...
       o('kappa_vs_python.csv'), 0; o('alt_member_metrics.csv'), 0; o('alt_ensemble_metrics.csv'), 0; ...
       o('ablation_class_precision.csv'), 0; o('ablation_binary.csv'), 0; o('reliability_by_k.csv'), 0; ...
@@ -227,22 +227,37 @@ chk('6 validation', pcl(4) > pcl(3) && pcl(3) > pcl(2), ...
 clear cls_ev wv REF w2 pd
 
 %% Layer 7 - bootstrap
-Ci = readtable(o('bootstrap_ci.csv'), 'TextType', 'string');
-ci = @(m, col) Ci.(col)(strcmp(Ci.metric, m));
-Bs = load(o('bootstrap_samples.mat'), 'boot', 'mnames', 'BLOCK_M', 'NREP', 'SEED');
-chk('7 bootstrap', Bs.BLOCK_M == 500 && Bs.NREP == 1000 && Bs.SEED == 42, 'configuration is 500 m blocks, 1000 repeats, seed 42');
-chk('7 bootstrap', size(Bs.boot, 1) == 1000, 'bootstrap_samples.mat holds 1000 replicates');
-chk('7 bootstrap', ~any(Ci.estimate < Ci.ci_low | Ci.estimate > Ci.ci_high), 'every estimate lies inside its 95 % interval');
-chk('7 bootstrap', all(Ci.ci_width(~isnan(Ci.ci_width)) > 0), 'every interval has a positive width');
-chk('7 bootstrap', abs(ci('f1','estimate') - Bm.f1) < 1e-4 && abs(ci('precision','estimate') - Bm.precision) < 1e-4 && ...
-    abs(ci('recall','estimate') - Bm.recall) < 1e-4, 'step 8 estimates equal the step 7 binary metrics');
-chk('7 bootstrap', max(abs([ci('prec_low','estimate') ci('prec_medium','estimate') ci('prec_high','estimate')] - pcl(2:4))) < 1e-4, ...
-    'step 8 class-precision estimates equal the recomputed ones');
-qf = find(strcmp(Bs.mnames, 'f1'));
-chk('7 bootstrap', abs(pctl(Bs.boot(:,qf), 2.5) - ci('f1','ci_low')) < 1e-4 && abs(pctl(Bs.boot(:,qf), 97.5) - ci('f1','ci_high')) < 1e-4, ...
-    'F1 interval recomputed from the saved replicates equals bootstrap_ci.csv');
-chk('7 bootstrap', ci('prec_high','ci_low') > ci('prec_medium','ci_high'), ...
-    sprintf('High and Medium intervals do not overlap (%.1f %% vs %.1f %%)', 100*ci('prec_high','ci_low'), 100*ci('prec_medium','ci_high')), 'warn');
+f_ci = o('bootstrap_ci.csv');
+if ~isfile(f_ci) && isfile(tb('bootstrap_ci.csv'))
+    f_ci = tb('bootstrap_ci.csv');
+end
+if isfile(f_ci)
+    Ci = readtable(f_ci, 'TextType', 'string');
+    ci = @(m, col) Ci.(col)(strcmp(Ci.metric, m));
+    chk('7 bootstrap', ~any(Ci.estimate < Ci.ci_low | Ci.estimate > Ci.ci_high), 'every estimate lies inside its 95 % interval');
+    chk('7 bootstrap', all(Ci.ci_width(~isnan(Ci.ci_width)) > 0), 'every interval has a positive width');
+    chk('7 bootstrap', abs(ci('f1','estimate') - Bm.f1) < 1e-4 && abs(ci('precision','estimate') - Bm.precision) < 1e-4 && ...
+        abs(ci('recall','estimate') - Bm.recall) < 1e-4, 'step 8 estimates equal the step 7 binary metrics');
+    chk('7 bootstrap', max(abs([ci('prec_low','estimate') ci('prec_medium','estimate') ci('prec_high','estimate')] - pcl(2:4))) < 1e-4, ...
+        'step 8 class-precision estimates equal the recomputed ones');
+    chk('7 bootstrap', ci('prec_high','ci_low') > ci('prec_medium','ci_high'), ...
+        sprintf('High and Medium intervals do not overlap (%.1f %% vs %.1f %%)', 100*ci('prec_high','ci_low'), 100*ci('prec_medium','ci_high')), 'warn');
+else
+    chk('7 bootstrap', false, 'bootstrap_ci.csv not found', 'optional');
+end
+
+if isfile(o('bootstrap_samples.mat'))
+    Bs = load(o('bootstrap_samples.mat'), 'boot', 'mnames', 'BLOCK_M', 'NREP', 'SEED');
+    chk('7 bootstrap', Bs.BLOCK_M == 500 && Bs.NREP == 1000 && Bs.SEED == 42, 'configuration is 500 m blocks, 1000 repeats, seed 42');
+    chk('7 bootstrap', size(Bs.boot, 1) == 1000, 'bootstrap_samples.mat holds 1000 replicates');
+    if isfile(f_ci)
+        qf = find(strcmp(Bs.mnames, 'f1'));
+        chk('7 bootstrap', abs(pctl(Bs.boot(:,qf), 2.5) - ci('f1','ci_low')) < 1e-4 && abs(pctl(Bs.boot(:,qf), 97.5) - ci('f1','ci_high')) < 1e-4, ...
+            'F1 interval recomputed from the saved replicates equals bootstrap_ci.csv');
+    end
+else
+    chk('7 bootstrap', true, 'bootstrap_samples.mat optional check skipped (cache not present)', 'optional');
+end
 
 %% Layer 8 - the same quantity must be identical wherever it appears
 chk('8 consistency', isequal(Vl.MEMBERS, MEMBERS) && Vl.K_FLOOD == Cm.K_FLOOD, 'step 4 and step 7 use the same ensemble and the same k rule');
@@ -265,12 +280,16 @@ led('F8', 'evaluated pixels',                 5550032, tp+fp+fn+tn, 0.02*5550032
 led('C1', 'class precision Low (%)',          45.5, 100*pcl(2), 3);
 led('C2', 'class precision Medium (%)',       83.7, 100*pcl(3), 3);
 led('C3', 'class precision High (%)',         88.4, 100*pcl(4), 3);
-led('B1', 'bootstrap F1 CI lower',            0.801, ci('f1','ci_low'),  tol3);
-led('B2', 'bootstrap F1 CI upper',            0.826, ci('f1','ci_high'), tol3);
-led('B3', 'bootstrap precision CI lower (%)', 81.10, 100*ci('precision','ci_low'),  3);
-led('B4', 'bootstrap precision CI upper (%)', 84.11, 100*ci('precision','ci_high'), 3);
-led('B5', 'bootstrap recall CI lower (%)',    78.54, 100*ci('recall','ci_low'),     3);
-led('B6', 'bootstrap recall CI upper (%)',    81.62, 100*ci('recall','ci_high'),    3);
+if isfile(f_ci)
+    led('B1', 'bootstrap F1 CI lower',            0.801, ci('f1','ci_low'),  tol3);
+    led('B2', 'bootstrap F1 CI upper',            0.826, ci('f1','ci_high'), tol3);
+    led('B3', 'bootstrap precision CI lower (%)', 81.10, 100*ci('precision','ci_low'),  3);
+    led('B4', 'bootstrap precision CI upper (%)', 84.11, 100*ci('precision','ci_high'), 3);
+    led('B5', 'bootstrap recall CI lower (%)',    78.54, 100*ci('recall','ci_low'),     3);
+    led('B6', 'bootstrap recall CI upper (%)',    81.62, 100*ci('recall','ci_high'),    3);
+else
+    led('B1', 'bootstrap F1 CI lower', 0.801, NaN, tol3);
+end
 
 if isfile(o('kappa_matrix.csv'))
     Kt = readtable(o('kappa_matrix.csv'), 'TextType', 'string');

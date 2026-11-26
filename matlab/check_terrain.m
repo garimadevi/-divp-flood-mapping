@@ -131,13 +131,13 @@ figh = round(figw / asp) + 90;
 figure('Color','w','Position',[80 80 figw figh]);
 tiledlayout(2,2,'Padding','compact','TileSpacing','compact');
 
-nexttile; imagesc(slope(ri,ci)); axis image off; colorbar; caxis([0 30]);
+nexttile; imagesc(slope(ri,ci)); axis image off; colorbar; clim([0 30]);
 title('Slope from raw DEM (deg)');
-nexttile; imagesc(perm_water(ri,ci)); axis image off; caxis([0 1]);
+nexttile; imagesc(perm_water(ri,ci)); axis image off; clim([0 1]);
 colormap(gca, gray(2)); title(sprintf('JRC occurrence >= %d %%', JRC_MIN));
-nexttile; imagesc(urban(ri,ci) + 2*veg(ri,ci)); axis image off; caxis([0 2]);
+nexttile; imagesc(urban(ri,ci) + 2*veg(ri,ci)); axis image off; clim([0 2]);
 colormap(gca, parula(3)); title('WorldCover: 1 urban, 2 vegetation');
-nexttile; imagesc(domain(ri,ci)); axis image off; caxis([0 1]);
+nexttile; imagesc(domain(ri,ci)); axis image off; clim([0 1]);
 colormap(gca, gray(2)); title(sprintf('Analysis domain (white = used) %.1f km^2', nnz(domain)*1e-4));
 
 sgtitle('Independent re-derivation of the static layers (cross-check only, nothing written to data/processed)', ...

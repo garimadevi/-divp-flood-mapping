@@ -17,8 +17,17 @@ if ~exist('P','var'), setup_paths; end
 
 %% Section A - settings and inputs
 f_green = fullfile(P.raw,'sentinel2','s2_post_b03_green.tif');    % <- edit the three names
+if ~isfile(f_green), f_green = fullfile(P.raw,'sentinel2','s2_post_B03.tif'); end
+if ~isfile(f_green), f_green = fullfile(P.raw,'sentinel2','s2_post_b03.tif'); end
+
 f_swir  = fullfile(P.raw,'sentinel2','s2_post_b11_swir1.tif');
+if ~isfile(f_swir), f_swir = fullfile(P.raw,'sentinel2','s2_post_B11.tif'); end
+if ~isfile(f_swir), f_swir = fullfile(P.raw,'sentinel2','s2_post_b11.tif'); end
+
 f_scl   = fullfile(P.raw,'sentinel2','s2_post_scl.tif');
+if ~isfile(f_scl), f_scl = fullfile(P.raw,'sentinel2','s2_post_SCL.tif'); end
+if ~isfile(f_scl), f_scl = fullfile(P.raw,'sentinel2','s2_post_scl.tif'); end
+
 f_grid  = fullfile(P.processed,'s1_post_vv_db.tif');
 
 MNDWI_THR    = 0.0;          % water if MNDWI > 0
@@ -210,7 +219,7 @@ vcmap = [0.35 0.35 0.35;   % not evaluated (cloud, permanent water, steep terrai
          0.93 0.93 0.93];  % true negative
 asp = numel(ci) / max(numel(ri), 1);
 figure('Color','w','Position',[80 80 1000 round(1000/asp) + 80]);
-imagesc(vm(ri,ci)); axis image off; colormap(vcmap); caxis([-0.5 4.5]);
+imagesc(vm(ri,ci)); axis image off; colormap(vcmap); clim([-0.5 4.5]);
 cb = colorbar; cb.Ticks = 0:4;
 cb.TickLabels = {'not evaluated','true positive','false positive','false negative','true negative'};
 title(sprintf('Final flood map vs Sentinel-2 MNDWI  (F1 %.3f, precision %.3f, recall %.3f)', ...
@@ -225,7 +234,7 @@ figure('Color','w','Position',[60 60 1250 400]);
 subplot(1,3,1);
 CM  = [BE.tn BE.fp; BE.fn BE.tp];                   % rows: reference, columns: predicted
 CMn = CM ./ sum(CM, 2);
-imagesc(CMn); axis image; caxis([0 1]); colormap(gca, parula);
+imagesc(CMn); axis image; clim([0 1]); colormap(gca, parula);
 set(gca,'XTick',1:2,'XTickLabel',{'dry','flood'},'YTick',1:2,'YTickLabel',{'not water','water'});
 xlabel('predicted'); ylabel('Sentinel-2 reference');
 for a = 1:2

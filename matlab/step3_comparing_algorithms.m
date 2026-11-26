@@ -134,7 +134,7 @@ fprintf('unanimous = %.1f %% of everything any method calls flood\n', 100*vc(nM+
 
 %% Section F - figure 1: full kappa matrix
 figure('Color','w','Position',[80 80 640 560]);
-imagesc(KAPPA); axis image; caxis([0 1]); colorbar; colormap(parula);
+imagesc(KAPPA); axis image; clim([0 1]); colorbar; colormap(parula);
 set(gca,'XTick',1:nM,'XTickLabel',lab,'YTick',1:nM,'YTickLabel',lab);
 for i = 1:nM
     for j = 1:nM
@@ -185,7 +185,7 @@ for q = 1:3
     a = pairs{q,1};  c = pairs{q,2};
     cat4 = zeros(n_dom,1);  cat4(a & c) = 1;  cat4(a & ~c) = 2;  cat4(~a & c) = 3;
     tmp = nan(nr,nc);  tmp(dom) = cat4;
-    subplot(1,3,q); imagesc(tmp(ri,ci)); axis image off; caxis([0 3]);
+    subplot(1,3,q); imagesc(tmp(ri,ci)); axis image off; clim([0 3]);
     colormap(gca, [0.88 0.88 0.88; 0.10 0.35 0.90; 0.85 0.20 0.15; 0.95 0.65 0.10]);
     title(sprintf('%s   \\kappa = %.2f', pairs{q,3}, cohen_kappa(a,c)));
     xlabel(sprintf('blue: both | red: only %s | orange: only %s', pairs{q,4}, pairs{q,5}));
@@ -271,7 +271,7 @@ elseif k <= 0.2, s = 'slight';
 elseif k <= 0.4, s = 'fair';
 elseif k <= 0.6, s = 'moderate';
 elseif k <= 0.8, s = 'substantial';
-else             s = 'almost perfect';
+else,            s = 'almost perfect';
 end
 end
 
