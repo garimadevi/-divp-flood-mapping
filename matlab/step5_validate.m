@@ -33,7 +33,7 @@ f_grid  = fullfile(P.processed,'s1_post_vv_db.tif');
 MNDWI_THR    = 0.0;          % water if MNDWI > 0
 S2_OFFSET_DN = -1000;        % L2A baseline >= 04.00: refl = (DN - 1000)/10000. Use 0 if already reflectance
 S2_SCALE     = 1e-4;
-CLEAR_SCL    = [4 5 6];      % vegetation, bare soil, water (no cloud, shadow, cirrus, snow)
+CLEAR_SCL    = [2 4 5 6 7];      % vegetation, bare soil, water (no cloud, shadow, cirrus, snow)
 
 MEMBERS = {'otsu_vv','otsu_vh','change_vv','gmm'};   % the final four-method ensemble
 K_FLOOD = 2;                                         % binary flood map: k >= 2

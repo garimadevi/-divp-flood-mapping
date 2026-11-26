@@ -1,4 +1,4 @@
-# MATLAB Layer — Build Guide & Work Split
+## MATLAB Layer — Build Guide & Work Split
 
 **Goal:** re-implement the *image-processing core* of this project in MATLAB, in
 course-native primitives (`graythresh`, `imfilter`, `imopen`, `bwareaopen`,

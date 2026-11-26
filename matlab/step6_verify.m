@@ -30,7 +30,7 @@ tb = @(n) fullfile(P.tables, n);
 f_perm = fullfile(P.processed, 'masks', 'permanent_water.tif');
 
 %% Layer 0 - environment
-chk('0 environment', ~verLessThan('matlab','9.9'), sprintf('MATLAB %s (R2020b or newer needed)', version('-release')));
+chk('0 environment', ~isMATLABReleaseOlderThan('R2020b'), sprintf('MATLAB %s (R2020b or newer needed)', version('-release')));
 chk('0 environment', license('test','map_toolbox'),   'Mapping Toolbox licensed');
 chk('0 environment', license('test','image_toolbox'), 'Image Processing Toolbox licensed');
 
