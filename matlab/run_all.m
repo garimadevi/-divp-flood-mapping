@@ -31,20 +31,22 @@ scripts = {
     'check_terrain.m'
 };
 
-% Execute scripts sequentially
-for k = 1:length(scripts)
+% Execute scripts sequentially. Use a loop variable that the scripts
+% themselves do not define: `run` shares this workspace, and step4
+% uses `k` for the vote count.
+for runIdx = 1:numel(scripts)
 
     fprintf('\n------------------------------------\n');
-    fprintf('Running: %s\n', scripts{k});
+    fprintf('Running: %s\n', scripts{runIdx});
     fprintf('------------------------------------\n');
 
     try
-        run(fullfile(project_dir, scripts{k}));
+        run(fullfile(project_dir, scripts{runIdx}));
 
-        fprintf('SUCCESS: %s completed.\n', scripts{k});
+        fprintf('SUCCESS: %s completed.\n', scripts{runIdx});
 
     catch ME
-        fprintf('\nERROR in %s:\n', scripts{k});
+        fprintf('\nERROR in %s:\n', scripts{runIdx});
         fprintf('%s\n', ME.message);
 
         rethrow(ME);

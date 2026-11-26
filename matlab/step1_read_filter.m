@@ -1,4 +1,4 @@
-%% Section A — read the analysis-ready layer
+%% Section A - read the analysis-ready layer
 if ~exist('P','var'), setup_paths; end
 
 f = fullfile(P.processed,'s1_post_vv_db.tif');
@@ -11,7 +11,7 @@ fprintf('size        : %d x %d\n', size(I,1), size(I,2));
 fprintf('valid       : %.2f %%\n', 100*mean(valid(:)));
 fprintf('min/med/max : %.3f / %.3f / %.3f dB\n', min(x), median(x), max(x));
 
-%% Section B — the histogram you can see
+%% histogram of valid pixels
 figure('Color','w');
 histogram(x, 200, 'FaceColor',[.30 .30 .35], 'EdgeColor','none');
 xlabel('VV backscatter (dB)'); ylabel('pixel count');
@@ -19,13 +19,13 @@ title('Post-event VV (dB), Lee 7\times7');   % short: avoids the x10^5 offset la
 grid on
 saveas(gcf, fullfile(P.out,'hist_post_vv.png'));
 
-%% Section C — Otsu, the course way
+%% Otsu via graythresh
 lo = min(x); hi = max(x);
 t_norm = graythresh((x - lo)/(hi - lo));        % TRAP 2: needs [0,1]
 t = lo + t_norm*(hi - lo);
 fprintf('Otsu VV = %.4f dB   (Python: -12.5534)\n', t);
 
-%% Section D — prove your Lee filter (linear power, then dB)
+%% rebuild the Lee filter from linear power
 [Lraw, ~] = readgeoraster(fullfile(P.raw,'sentinel1','s1_rtc_post_vv.tif'), ...
                           'OutputType','double');
 Lraw(Lraw == -32768) = NaN;
@@ -47,7 +47,7 @@ Idb(good) = 10*log10(Lf(good));
 d = abs(Idb - I); d = d(isfinite(d));
 fprintf('Lee rebuild vs processed file: max %.6f dB | P99 %.6f dB\n', max(d), prctile(d,99));
 
-%% Section E — what the filter actually did (the demo figure)
+%% filter effect in the 3 km demo crop
 r0 = 1200; c0 = 1500; n = 300;            % 300 px = 3.00 km at 10 m
 figure('Color','w','Position',[80 80 940 520]);
 
@@ -75,7 +75,7 @@ sgtitle(['Same 90,000 pixels (3\times3 km), 23 Jun 2023, ', ...
          'lon 91.70-91.73 E - only the filter differs'], 'FontSize',12);
 saveas(gcf, fullfile(P.out,'lee_before_after.png'));
 
-%% Section F — self-check (the two numbers a viva will ask for)
+%% Section F - self-check
 fprintf('\n--- step1 verification ---\n');
 if abs(t - (-12.5534)) < 0.25
     fprintf('PASS  Otsu VV %.4f dB is within one 256-bin histogram bin of Python -12.5534\n', t);

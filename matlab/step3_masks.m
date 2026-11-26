@@ -155,7 +155,7 @@ sgtitle(sprintf(['Six flood masks, MATLAB re-implementation - analysis domain on
                  '1 px = 0.0001 km^2']), 'FontSize',12);
 saveas(gcf, fullfile(P.out,'masks_overview_matlab.png'));
 
-%% Section J - self-check (the numbers a viva will ask for)
+%% Section J - self-check
 fprintf('\n--- step3 verification ---\n');
 
 sizes_ok = true;
