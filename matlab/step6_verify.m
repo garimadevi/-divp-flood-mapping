@@ -377,7 +377,7 @@ end
 if nargin < 4, kind = 'fail'; end
 if isempty(ok), ok = false; end
 ok = all(ok(:));
-if ok,                       st = 'PASS';
+if ok, st = 'PASS';
 elseif strcmp(kind,'warn'),  st = 'WARN';
 elseif strcmp(kind,'optional'), st = 'SKIP';
 else,                        st = 'FAIL'; end
