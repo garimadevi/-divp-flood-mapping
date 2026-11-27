@@ -25,8 +25,8 @@ scripts = {
     'step3_comparing_algorithms.m'
     'step4_confidence.m'
     'step5_validate.m'
-    'step4_confidence_a.m'
-    'step4_confidence_b.m'
+    'step5_confidence_a.m'
+    'step5_confidence_b.m'
     'step6_verify.m'
     'check_terrain.m'
 };

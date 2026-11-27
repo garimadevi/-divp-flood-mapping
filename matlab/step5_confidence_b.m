@@ -1,5 +1,5 @@
-%% step6b_alternative_members.m - replace the adaptive member? Kittler vs GMM
-% Mirrors the alternative-member validation of the report (Step 6B):
+%% step5_confidence_b.m - replace the adaptive member? Kittler vs GMM
+% Alternative fourth-member validation:
 %   (1) validate the candidate 4th members (adaptive, Kittler, GMM) against S2 MNDWI
 %   (2) check how well each agrees with the three base methods (Cohen's kappa)
 %   (3) rebuild the four-method confidence ensemble with each candidate
@@ -192,7 +192,7 @@ saveas(gcf, fullfile(P.out,'alt_ensembles.png'));
 %% Section H - self-check (numbers from the report)
 near = @(a, b, tol) abs(a - b) <= tol;
 ia = find(strcmp(CAND,'adaptive_vv'));
-fprintf('\n--- step6b verification ---\n');
+fprintf('\n--- step5_confidence_b verification ---\n');
 report(abs(n_eval - 5550032)/5550032 < 0.02, ...
        sprintf('evaluated pixels %d within 2 %% of the report (5,550,032)', n_eval));
 report(near(MM{ik}.prec, 0.925, 0.02) && near(MM{ik}.rec, 0.667, 0.02), ...
